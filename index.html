@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="lo">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>ລະບົບບໍລິຫານບຸກຄະລາກອນ SSMI HRM — Web Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#0A2647;
+    --navy-2:#0F3163;
+    --navy-3:#1B4B8F;
+    --gold:#D9A94E;
+    --gold-dark:#B8863A;
+    --ink:#12233F;
+    --muted:#5B6B82;
+    --bg:#F4F6F9;
+    --card:#FFFFFF;
+    --border:#E3E8F0;
+    --benefit-bg:#FBF3E1;
+    --benefit-border:#EED9AE;
+
+    --title-size:30px;
+    --h2-size:26px;
+    --tagline-size:18px;
+    --body-size:17px;
+    --small-size:13px;
+    --eyebrow-size:13px;
+  }
+  @media (min-width:800px){
+    :root{
+      --title-size:44px;
+      --h2-size:34px;
+      --tagline-size:23px;
+      --body-size:22px;
+      --small-size:15px;
+      --eyebrow-size:15px;
+    }
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Noto Sans Lao','Phetsarath OT',sans-serif;
+    background:#1a1a1a;
+    color:var(--ink);
+    height:100vh;
+    overflow:hidden;
+  }
+  h1,h2,h3,p,ul{margin:0;}
+  .icon{width:1em;height:1em;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;vertical-align:-0.15em;}
+
+  /* ---------- Slide shell ---------- */
+  #slides{position:relative;width:100vw;height:100vh;background:var(--bg);}
+  .slide{
+    display:none;
+    position:absolute;inset:0;
+    width:100vw;height:100vh;
+    background:var(--card);
+    flex-direction:column;
+  }
+  .slide.active{display:flex;}
+  .slide-inner{
+    flex:1 1 auto;
+    min-height:0;
+    overflow-y:auto;
+    padding:clamp(20px,4vw,56px) clamp(24px,7vw,110px) clamp(10px,2vw,20px);
+    display:flex;
+    flex-direction:column;
+    gap:clamp(10px,1.6vw,20px);
+  }
+  .slide-footer{
+    flex:0 0 auto;
+    display:flex;justify-content:space-between;align-items:center;
+    padding:10px clamp(24px,7vw,110px) 14px;
+    font-size:var(--small-size);
+    color:var(--muted);
+    border-top:1px solid var(--border);
+  }
+  .slide-footer b{color:var(--navy-3);}
+
+  .eyebrow{
+    display:flex;align-items:center;gap:8px;
+    font-size:var(--eyebrow-size);
+    font-weight:700;
+    letter-spacing:.06em;
+    color:var(--gold-dark);
+    text-transform:uppercase;
+  }
+  .eyebrow .icon{width:1.1em;height:1.1em;}
+
+  /* ---------- Module slide ---------- */
+  .module-head{display:flex;align-items:center;gap:18px;}
+  .module-icon{
+    flex:0 0 auto;
+    width:clamp(48px,5vw,72px);height:clamp(48px,5vw,72px);
+    border-radius:16px;
+    background:linear-gradient(135deg,var(--navy),var(--navy-3));
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;
+  }
+  .module-icon .icon{width:52%;height:52%;stroke-width:1.6;}
+  .module-title{font-size:var(--title-size);font-weight:800;color:var(--navy);line-height:1.2;}
+  .tagline{font-size:var(--tagline-size);color:var(--muted);font-weight:500;line-height:1.4;}
+  .section-label{
+    font-size:var(--small-size);font-weight:700;letter-spacing:.04em;
+    color:var(--navy-3);text-transform:uppercase;
+    border-bottom:2px solid var(--border);
+    padding-bottom:6px;margin-top:4px;
+  }
+  .feature-list{list-style:none;padding:0;display:grid;gap:10px;}
+  .feature-list li{
+    position:relative;padding-left:1.7em;
+    font-size:var(--body-size);line-height:1.45;color:var(--ink);
+  }
+  .feature-list li::before{
+    content:'';position:absolute;left:0;top:.5em;
+    width:9px;height:9px;background:var(--gold);border-radius:3px;
+  }
+  .benefit-box{
+    margin-top:auto;
+    background:var(--benefit-bg);
+    border:1px solid var(--benefit-border);
+    border-left:6px solid var(--gold);
+    border-radius:10px;
+    padding:clamp(12px,1.6vw,20px) clamp(16px,2vw,24px);
+  }
+  .benefit-label{
+    font-size:var(--small-size);font-weight:800;color:var(--gold-dark);
+    text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;
+  }
+  .benefit-text{font-size:var(--body-size);font-weight:600;color:var(--navy);line-height:1.45;}
+  .benefit-text ul{list-style:none;padding:0;display:grid;gap:6px;}
+  .benefit-text li{position:relative;padding-left:1.4em;}
+  .benefit-text li::before{content:'✓';position:absolute;left:0;top:0;color:var(--gold-dark);font-weight:800;}
+
+  /* ---------- Cover ---------- */
+  .cover{
+    background:radial-gradient(circle at 15% 15%,var(--navy-3),var(--navy) 60%);
+    color:#fff;align-items:flex-start;justify-content:center;
+  }
+  .cover .slide-inner{justify-content:center;gap:22px;}
+  .cover-tag{
+    display:inline-flex;align-items:center;gap:10px;
+    font-size:var(--small-size);font-weight:700;letter-spacing:.12em;
+    color:var(--gold);text-transform:uppercase;
+    border:1px solid rgba(217,169,78,.5);
+    padding:6px 14px;border-radius:999px;width:max-content;
+  }
+  .cover h1{
+    font-size:clamp(32px,5.2vw,64px);
+    font-weight:800;line-height:1.18;color:#fff;
+    max-width:16ch;
+  }
+  .cover h1 span{color:var(--gold);}
+  .cover .cover-sub{font-size:var(--tagline-size);color:#CBD8ED;max-width:42ch;}
+  .cover .cover-company{
+    margin-top:18px;padding-top:18px;border-top:1px solid rgba(255,255,255,.18);
+    font-size:var(--body-size);color:#fff;font-weight:600;max-width:46ch;line-height:1.5;
+  }
+  .cover .cover-date{font-size:var(--small-size);color:#9FB4D6;margin-top:6px;}
+
+  /* ---------- Overview ---------- */
+  .overview-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:4px;}
+  @media (max-width:760px){.overview-grid{grid-template-columns:1fr;}}
+  .overview-card{
+    border:1px solid var(--border);border-radius:14px;
+    padding:clamp(16px,2vw,26px);
+    background:#fff;
+  }
+  .overview-card.focus{border:2px solid var(--gold);background:var(--benefit-bg);}
+  .overview-card .oc-icon{
+    width:52px;height:52px;border-radius:12px;
+    background:var(--navy);color:#fff;
+    display:flex;align-items:center;justify-content:center;margin-bottom:12px;
+  }
+  .overview-card .oc-icon .icon{width:55%;height:55%;}
+  .overview-card h3{font-size:calc(var(--tagline-size) + 2px);color:var(--navy);font-weight:800;margin-bottom:8px;}
+  .overview-card p{font-size:var(--body-size);color:var(--ink);line-height:1.5;}
+  .overview-note{
+    margin-top:auto;font-size:var(--body-size);font-weight:700;color:var(--navy);
+    background:var(--bg);border-left:5px solid var(--navy-3);
+    border-radius:8px;padding:12px 16px;
+  }
+
+  /* ---------- TOC ---------- */
+  .toc-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;flex:1;min-height:0;}
+  @media (max-width:1000px){.toc-grid{grid-template-columns:repeat(2,1fr);}}
+  @media (max-width:560px){.toc-grid{grid-template-columns:1fr;}}
+  .toc-card{
+    border:1px solid var(--border);border-radius:12px;
+    padding:14px;display:flex;flex-direction:column;gap:8px;
+    background:#fff;min-height:0;
+  }
+  .toc-card-head{display:flex;align-items:center;gap:8px;}
+  .toc-letter{
+    width:30px;height:30px;border-radius:8px;background:var(--navy);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;flex:0 0 auto;
+  }
+  .toc-card-head .toc-name{font-weight:800;color:var(--navy);font-size:calc(var(--small-size) + 2px);}
+  .toc-count{font-size:11px;color:var(--muted);font-weight:600;}
+  .toc-list{list-style:none;padding:0;display:grid;gap:5px;overflow-y:auto;}
+  .toc-list li a{
+    display:block;font-size:var(--small-size);color:var(--ink);text-decoration:none;
+    padding:4px 6px;border-radius:6px;line-height:1.35;
+    cursor:pointer;
+  }
+  .toc-list li a:hover{background:var(--benefit-bg);color:var(--navy);}
+
+  /* ---------- List slides (security / automation) ---------- */
+  .list-slide-icon{
+    width:64px;height:64px;border-radius:16px;background:var(--navy);color:#fff;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .list-slide-icon .icon{width:55%;height:55%;}
+  .big-list{list-style:none;padding:0;display:grid;gap:12px;margin-top:6px;}
+  .big-list li{
+    position:relative;padding:10px 14px 10px 42px;
+    font-size:var(--body-size);line-height:1.4;color:var(--ink);
+    background:var(--bg);border-radius:10px;
+  }
+  .big-list li .li-icon{
+    position:absolute;left:10px;top:50%;transform:translateY(-50%);
+    width:22px;height:22px;color:var(--gold-dark);
+  }
+
+  /* ---------- Roadmap ---------- */
+  .roadmap-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
+  @media (max-width:700px){.roadmap-grid{grid-template-columns:1fr;}}
+  .roadmap-card{
+    border:1px dashed var(--gold-dark);border-radius:12px;
+    padding:16px 18px;background:var(--benefit-bg);
+    display:flex;gap:14px;align-items:flex-start;
+  }
+  .roadmap-card .rc-icon{
+    width:42px;height:42px;border-radius:10px;background:var(--navy);color:#fff;
+    display:flex;align-items:center;justify-content:center;flex:0 0 auto;
+  }
+  .roadmap-card .rc-icon .icon{width:55%;height:55%;}
+  .roadmap-card h3{font-size:calc(var(--body-size) + 2px);color:var(--navy);font-weight:800;margin-bottom:4px;}
+  .roadmap-card p{font-size:var(--small-size);color:var(--ink);line-height:1.4;}
+  .roadmap-badge{
+    display:inline-block;margin-top:6px;font-size:11px;font-weight:800;
+    color:var(--gold-dark);background:#fff;border:1px solid var(--gold-dark);
+    border-radius:999px;padding:2px 10px;
+  }
+
+  /* ---------- Summary ---------- */
+  .summary-list{list-style:none;padding:0;display:grid;gap:14px;margin-top:8px;}
+  .summary-list li{
+    display:flex;align-items:center;gap:14px;
+    font-size:calc(var(--body-size) + 1px);font-weight:700;color:var(--navy);
+    background:var(--bg);border-radius:12px;padding:14px 18px;
+  }
+  .summary-list .num{
+    flex:0 0 auto;width:34px;height:34px;border-radius:50%;
+    background:var(--gold);color:var(--navy);font-weight:800;
+    display:flex;align-items:center;justify-content:center;font-size:16px;
+  }
+  .thanks{margin-top:auto;text-align:center;font-size:var(--tagline-size);font-weight:800;color:var(--navy-3);}
+
+  /* ---------- UI controls ---------- */
+  .ui-controls{
+    position:fixed;left:0;right:0;top:0;z-index:50;
+  }
+  .progress-bar{height:4px;background:var(--border);width:100%;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--gold-dark),var(--gold));width:0%;transition:width .25s ease;}
+  .toc-btn{
+    position:fixed;top:14px;right:16px;z-index:60;
+    background:var(--navy);color:#fff;border:none;border-radius:999px;
+    padding:8px 16px;font-size:var(--small-size);font-weight:700;
+    display:flex;align-items:center;gap:6px;cursor:pointer;
+    font-family:inherit;
+  }
+  .toc-btn .icon{width:16px;height:16px;}
+  .nav-controls{
+    position:fixed;bottom:14px;left:0;right:0;z-index:60;
+    display:flex;align-items:center;justify-content:center;gap:14px;
+  }
+  .nav-btn{
+    background:#fff;border:1px solid var(--border);border-radius:999px;
+    width:42px;height:42px;display:flex;align-items:center;justify-content:center;
+    cursor:pointer;box-shadow:0 2px 8px rgba(10,38,71,.12);
+  }
+  .nav-btn .icon{width:20px;height:20px;color:var(--navy);}
+  .nav-btn:disabled{opacity:.35;cursor:default;}
+  .slide-counter{
+    background:#fff;border:1px solid var(--border);border-radius:999px;
+    padding:8px 16px;font-size:var(--small-size);font-weight:700;color:var(--navy);
+    box-shadow:0 2px 8px rgba(10,38,71,.12);
+  }
+
+  /* ---------- Print ---------- */
+  @media print{
+    :root{
+      --title-size:32px;--h2-size:26px;--tagline-size:17px;--body-size:15px;--small-size:11px;--eyebrow-size:11px;
+    }
+    @page{size:landscape;margin:0;}
+    html,body{height:auto;overflow:visible;background:#fff;}
+    .ui-controls,.toc-btn,.nav-controls{display:none !important;}
+    #slides{position:static;width:auto;height:auto;}
+    .slide{
+      display:flex !important;
+      position:static !important;
+      width:100vw;height:100vh;
+      page-break-after:always;
+      break-after:page;
+    }
+    .slide-inner{overflow:visible;}
+  }
+</style>
+</head>
+<body>
+
+<svg style="display:none">
+  <symbol id="icon-dashboard" viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="5" rx="1.5"/><rect x="13" y="10" width="8" height="11" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/></symbol>
+  <symbol id="icon-calendar-check" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16" rx="2"/><line x1="3" y1="9.5" x2="21" y2="9.5"/><line x1="7.5" y1="2.5" x2="7.5" y2="6.5"/><line x1="16.5" y1="2.5" x2="16.5" y2="6.5"/><polyline points="8,14.5 11,17.5 16,12.5"/></symbol>
+  <symbol id="icon-map-pin" viewBox="0 0 24 24"><path d="M12 21c-4-4.5-7-8.2-7-11.6A7 7 0 0 1 19 9.4C19 12.8 16 16.5 12 21Z"/><circle cx="12" cy="9.4" r="2.4"/></symbol>
+  <symbol id="icon-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><polyline points="12,7 12,12 16,14.5"/></symbol>
+  <symbol id="icon-users" viewBox="0 0 24 24"><circle cx="8.5" cy="8" r="3.2"/><path d="M2.5 20c0-3.6 2.7-6 6-6s6 2.4 6 6"/><circle cx="17" cy="8.5" r="2.6"/><path d="M15.5 14.3c2.7.3 4.9 2.5 4.9 5.7"/></symbol>
+  <symbol id="icon-shield" viewBox="0 0 24 24"><path d="M12 3 4.5 5.8v5.4c0 5 3.3 8.4 7.5 9.8 4.2-1.4 7.5-4.8 7.5-9.8V5.8Z"/><polyline points="8.5,12.2 11,14.7 15.5,9.7"/></symbol>
+  <symbol id="icon-building" viewBox="0 0 24 24"><rect x="4" y="3" width="12" height="18" rx="1"/><line x1="7" y1="7" x2="7" y2="7.01"/><line x1="10.5" y1="7" x2="10.5" y2="7.01"/><line x1="13" y1="7" x2="13" y2="7.01"/><line x1="7" y1="11" x2="7" y2="11.01"/><line x1="10.5" y1="11" x2="10.5" y2="11.01"/><line x1="13" y1="11" x2="13" y2="11.01"/><line x1="7" y1="15" x2="7" y2="15.01"/><line x1="10.5" y1="15" x2="10.5" y2="15.01"/><line x1="13" y1="15" x2="13" y2="15.01"/><path d="M16 9h4v12h-4"/></symbol>
+  <symbol id="icon-layers" viewBox="0 0 24 24"><polygon points="12,3 21,8 12,13 3,8"/><polyline points="3,13 12,18 21,13"/><polyline points="3,17.5 12,22.5 21,17.5"/></symbol>
+  <symbol id="icon-bar-chart" viewBox="0 0 24 24"><line x1="4" y1="21" x2="20" y2="21"/><rect x="5.5" y="13" width="4" height="8"/><rect x="10.5" y="8" width="4" height="13"/><rect x="15.5" y="4" width="4" height="17"/></symbol>
+  <symbol id="icon-hash" viewBox="0 0 24 24"><line x1="9" y1="3" x2="6.5" y2="21"/><line x1="17" y1="3" x2="14.5" y2="21"/><line x1="4" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="20" y2="15"/></symbol>
+  <symbol id="icon-swap" viewBox="0 0 24 24"><polyline points="4,7 20,7"/><polyline points="16,3 20,7 16,11"/><polyline points="20,17 4,17"/><polyline points="8,13 4,17 8,21"/></symbol>
+  <symbol id="icon-book" viewBox="0 0 24 24"><path d="M12 5.5c-1.8-1.4-4.3-2-7-2v14.5c2.7 0 5.2.6 7 2 1.8-1.4 4.3-2 7-2V3.5c-2.7 0-5.2.6-7 2Z"/><line x1="12" y1="5.5" x2="12" y2="20"/></symbol>
+  <symbol id="icon-calendar" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="16" rx="2"/><line x1="3" y1="9.5" x2="21" y2="9.5"/><line x1="7.5" y1="2.5" x2="7.5" y2="6.5"/><line x1="16.5" y1="2.5" x2="16.5" y2="6.5"/><line x1="7" y1="13.5" x2="7" y2="13.51"/><line x1="12" y1="13.5" x2="12" y2="13.51"/><line x1="17" y1="13.5" x2="17" y2="13.51"/><line x1="7" y1="17" x2="7" y2="17.01"/><line x1="12" y1="17" x2="12" y2="17.01"/></symbol>
+  <symbol id="icon-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 3v2.4M12 18.6V21M21 12h-2.4M5.4 12H3M18 6l-1.7 1.7M7.7 16.3 6 18M18 18l-1.7-1.7M7.7 7.7 6 6"/></symbol>
+  <symbol id="icon-key" viewBox="0 0 24 24"><circle cx="7.5" cy="15.5" r="4.5"/><path d="M10.8 12.2 19 4l2 2-2 2 1.5 1.5-2.5 2.5L16.5 10.5 13.2 13.8"/></symbol>
+  <symbol id="icon-lock" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+  <symbol id="icon-bolt" viewBox="0 0 24 24"><polygon points="13,2 4,14 11,14 9,22 20,9 13,9"/></symbol>
+  <symbol id="icon-rocket" viewBox="0 0 24 24"><path d="M12 2.5c3 1.8 5 5.2 5 9.3 0 2.7-1 5.4-2.6 7.3l-2.4 2-2.4-2C8 17.2 7 14.5 7 11.8c0-4.1 2-7.5 5-9.3Z"/><circle cx="12" cy="10.5" r="2"/><path d="M7.5 15.5 4 17.5l1-4.2M16.5 15.5 20 17.5l-1-4.2M9.5 21l2.5 1 2.5-1"/></symbol>
+  <symbol id="icon-check-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.3"/><polyline points="7.5,12.5 10.5,15.5 16.5,9"/></symbol>
+  <symbol id="icon-smartphone" viewBox="0 0 24 24"><rect x="6.5" y="2.5" width="11" height="19" rx="2"/><line x1="10" y1="19" x2="14" y2="19"/></symbol>
+  <symbol id="icon-monitor" viewBox="0 0 24 24"><rect x="2.5" y="4" width="19" height="13" rx="1.5"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></symbol>
+  <symbol id="icon-menu" viewBox="0 0 24 24"><line x1="4" y1="6.5" x2="20" y2="6.5"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17.5" x2="20" y2="17.5"/></symbol>
+  <symbol id="icon-chev-left" viewBox="0 0 24 24"><polyline points="15,4 7,12 15,20"/></symbol>
+  <symbol id="icon-chev-right" viewBox="0 0 24 24"><polyline points="9,4 17,12 9,20"/></symbol>
+  <symbol id="icon-doc" viewBox="0 0 24 24"><path d="M6 2.5h8l4 4v15H6Z"/><polyline points="14,2.5 14,6.5 18,6.5"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="16.5" x2="15" y2="16.5"/></symbol>
+  <symbol id="icon-chat" viewBox="0 0 24 24"><path d="M4 4.5h16v12H9l-5 4Z"/></symbol>
+  <symbol id="icon-profile" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20c0-4.1 3.4-7 7.5-7s7.5 2.9 7.5 7"/></symbol>
+  <symbol id="icon-coins" viewBox="0 0 24 24"><ellipse cx="9" cy="7" rx="6" ry="3.2"/><path d="M3 7v10c0 1.8 2.7 3.2 6 3.2s6-1.4 6-3.2V7"/><path d="M3 12c0 1.8 2.7 3.2 6 3.2s6-1.4 6-3.2"/><path d="M14.5 5.5c2.6.3 4.5 1.6 4.5 3.2v8.6c0 1.5-1.7 2.7-4 3.1"/></symbol>
+  <symbol id="icon-percent" viewBox="0 0 24 24"><line x1="19" y1="5" x2="5" y2="19"/><circle cx="7" cy="7" r="2.4"/><circle cx="17" cy="17" r="2.4"/></symbol>
+</svg>
+
+<div class="ui-controls">
+  <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+</div>
+<button class="toc-btn" id="btnTocJump" type="button"><svg class="icon"><use href="#icon-menu"></use></svg> ສາລະບານ</button>
+
+<div id="slides"></div>
+
+<div class="nav-controls">
+  <button class="nav-btn" id="btnPrev" type="button" aria-label="ກ່ອນໜ້າ"><svg class="icon"><use href="#icon-chev-left"></use></svg></button>
+  <div class="slide-counter" id="slideCounter">1 / 1</div>
+  <button class="nav-btn" id="btnNext" type="button" aria-label="ຖັດໄປ"><svg class="icon"><use href="#icon-chev-right"></use></svg></button>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var ICON = function(name, cls){
+    return '<svg class="icon '+(cls||'')+'"><use href="#icon-'+name+'"></use></svg>';
+  };
+
+  function features(list){
+    return '<ul class="feature-list">' + list.map(function(t){ return '<li>'+t+'</li>'; }).join('') + '</ul>';
+  }
+
+  function benefitBox(items){
+    if(!items || !items.length) return '';
+    var body = items.length === 1
+      ? '<div class="benefit-text">'+items[0]+'</div>'
+      : '<div class="benefit-text"><ul>'+items.map(function(t){return '<li>'+t+'</li>';}).join('')+'</ul></div>';
+    return '<div class="benefit-box"><div class="benefit-label">ປະໂຫຍດຕໍ່ບໍລິສັດ</div>'+body+'</div>';
+  }
+
+  var GROUP_LABELS = {
+    A: 'ພາບລວມ',
+    B: 'ການອະນຸມັດ',
+    C: 'ພະນັກງານ',
+    D: 'ລາຍງານ',
+    E: 'ຕັ້ງຄ່າ ແລະ ອື່ນໆ'
+  };
+
+  /* ================= SLIDE DATA ================= */
+  var DATA = [
+    { id:'cover', type:'cover' },
+    { id:'overview', type:'overview' },
+    { id:'toc', type:'toc' },
+
+    // Group A
+    { id:'mod-a1', type:'module', group:'A', icon:'dashboard',
+      title:'ລາຍງານສະພາບລວມ (Dashboard)',
+      tagline:'ໜ້າທຳອິດຫຼັງເຂົ້າລະບົບ — ເບິ່ງສະພາບພະນັກງານທັງບໍລິສັດ ໃນໜ້າດຽວ.',
+      features:[
+        'ເລືອກເບິ່ງ "ທຸກສາຂາ" ຫຼື ສະເພາະສາຂາ',
+        'ສະແດງຕົວເລກມື້ນີ້: ພະນັກງານມາການ, ອອກວຽກນອກ, ລາພັກ, ລາອອກໃນປີ, ພະນັກງານເກີດເດືອນນີ້',
+        'ລາຍການລາພັກ ແຍກເບິ່ງ ມື້ນີ້ / ອາທິດນີ້ / ເດືອນນີ້',
+        'ກຣາຟສະຫຼຸບການເຂົ້າວຽກ ແລະ ຂໍ້ມູນພະນັກງານ',
+        'ສິ່ງທີ່ເຫັນ ຂຶ້ນກັບສິດຂອງຜູ້ໃຊ້ (ຜູ້ບໍລິຫານເຫັນລວມ, ຫົວໜ້າເຫັນສະເພາະສ່ວນຕົນ)'
+      ],
+      benefit:['ຜູ້ບໍລິຫານຮູ້ສະຖານະກຳລັງຄົນໄດ້ທັນທີ ໂດຍບໍ່ຕ້ອງຖາມ HR']
+    },
+
+    // Group B
+    { id:'mod-b1', type:'module', group:'B', icon:'calendar-check',
+      title:'ອະນຸມັດການຂໍລາພັກ (Leave Approval)',
+      tagline:'ບ່ອນກວດ ແລະ ອະນຸມັດໃບລາ ທີ່ພະນັກງານຍື່ນຜ່ານແອັບມືຖື.',
+      features:[
+        'ເບິ່ງໃບລາແຍກຕາມສະຖານະ: ລໍຖ້າອະນຸມັດ / ອະນຸມັດແລ້ວ / ຖືກປະຕິເສດ / ທັງໝົດ',
+        'ເບິ່ງລາຍລະອຽດຄົບ: ຜູ້ລາ, ພະແນກ, ຕຳແໜ່ງ, ປະເພດການລາ, ເຫດຜົນ, ຈຳນວນວັນ (ລາເຄິ່ງມື້ໄດ້), ເອກະສານແນບ',
+        'ອະນຸມັດຫຼາຍລະດັບ (ຫົວໜ້າພະແນກ → ຜູ້ຈັດການ) ຫຼື ປະຕິເສດ ພ້ອມລະບຸເຫດຜົນ',
+        'ແກ້ໄຂວັນທີລາ — ລະບົບຄິດຈຳນວນວັນໃໝ່ໃຫ້ອັດຕະໂນມັດ',
+        'ຍົກເລີກໃບລາທີ່ອະນຸມັດແລ້ວ — ລະບົບຄືນຍອດວັນພັກໃຫ້ອັດຕະໂນມັດ',
+        'ພິມໃບລາເປັນ PDF'
+      ],
+      benefit:['ບໍ່ຕ້ອງໃຊ້ເຈ້ຍ, ອະນຸມັດໄວ, ມີຫຼັກຖານຄົບ ກວດຍ້ອນຫຼັງໄດ້']
+    },
+    { id:'mod-b2', type:'module', group:'B', icon:'map-pin',
+      title:'ອະນຸມັດການອອກວຽກນອກ (Offsite Approval)',
+      tagline:'ບ່ອນອະນຸມັດຄຳຮ້ອງໄປວຽກນອກຫ້ອງການ ຫຼື ທັດສະນະສຶກສາ.',
+      features:[
+        'ເບິ່ງຄຳຮ້ອງແຍກຕາມສະຖານະ: ລໍຖ້າ / ອະນຸມັດແລ້ວ / ຖືກປະຕິເສດ',
+        'ເບິ່ງລາຍລະອຽດການເດີນທາງ: ຫົວຂໍ້, ສະຖານທີ່, ວັນທີ-ເວລາ, ລົດທີ່ໃຊ້, ງົບປະມານ, ຈຸດປະສົງ, ກຳນົດການ',
+        'ເບິ່ງລາຍຊື່ຜູ້ຮ່ວມເດີນທາງ ແລະ ເອກະສານແນບ',
+        'ອະນຸມັດຕາມລະດັບ (ຫົວໜ້າພະແນກ / ຜູ້ຈັດການ) ຫຼື ປະຕິເສດ ພ້ອມເຫດຜົນ',
+        'ແກ້ໄຂວັນສິ້ນສຸດ — ລະບົບຄິດຈຳນວນມື້ໃໝ່ໃຫ້ອັດຕະໂນມັດ'
+      ],
+      benefit:['ຄວບຄຸມງົບປະມານການເດີນທາງ ແລະ ຮູ້ວ່າໃຜຢູ່ໃສ ໃນແຕ່ລະມື້']
+    },
+
+    // Group C
+    { id:'mod-c1', type:'module', group:'C', icon:'clock',
+      title:'ການເຂົ້າວຽກ (Daily Attendance)',
+      tagline:'ເບິ່ງການ Check-in / Check-out ຂອງພະນັກງານ ແບບປະຈຳວັນ.',
+      features:[
+        'ກັ່ນຕອງສະຖານະ: ມາທັນ, ມາຊ້າ, ຍັງບໍ່ມາ, ກັບແລ້ວ, ລືມກົດ, ລາພັກ, ອອກວຽກນອກ, ທັດສະນະ',
+        'ຄົ້ນຫາຊື່ພະນັກງານໄດ້ໄວ',
+        'ເບິ່ງຮູບຖ່າຍຕອນເຂົ້າ ແລະ ອອກວຽກ ພ້ອມຕຳແໜ່ງໃນ Google Map',
+        'ດາວໂຫຼດ PDF ລາຍງານປະຈຳວັນ ແບບເລືອກຖັນທີ່ຕ້ອງການໄດ້ (ມີຫົວເອກະສານລາຊະການ)'
+      ],
+      benefit:['ກວດສອບການມາວຽກໄດ້ແທ້ຈິງ ປ້ອງກັນການ Check-in ແທນກັນ']
+    },
+    { id:'mod-c2a', type:'module', group:'C', icon:'users',
+      tocTitle:'ຈັດການພະນັກງານ (Employee Management)',
+      title:'ຈັດການພະນັກງານ (Employee Management) — 1/2',
+      tagline:'ຖານຂໍ້ມູນພະນັກງານທັງໝົດຂອງບໍລິສັດ ຢູ່ບ່ອນດຽວ.',
+      features:[
+        'ສະຖິຕິລວມ: ພະນັກງານປັດຈຸບັນ, ລາອອກ, ຊາຍ/ຍິງ, ອາຍຸສະເລ່ຍ',
+        'ລາຍຊື່ພະນັກງານປັດຈຸບັນ ແລະ ພະນັກງານລາອອກ ແຍກໜ້າ',
+        'ປະຫວັດສ່ວນຕົວຄົບ: ຂໍ້ມູນສ່ວນຕົວ, ຄອບຄົວ, ການສຶກສາ, ການຝຶກອົບຮົມ, ຕິດຕໍ່ສຸກເສີນ',
+        'ຂໍ້ມູນການເຮັດວຽກ: ສາຂາ, ພະແນກ, ຕຳແໜ່ງ, ປະເພດພະນັກງານ, ເງິນເດືອນ, ມື້ເຮັດວຽກ',
+        'ເກັບເອກະສານປະກອບ: ບັດປະຈຳຕົວ, ຮູບ ແລະ ອື່ນໆ'
+      ]
+    },
+    { id:'mod-c2b', type:'module', group:'C', icon:'users', tocSkip:true,
+      title:'ຈັດການພະນັກງານ (Employee Management) — 2/2',
+      tagline:'ຄຸ້ມຄອງສະຖານະ ແລະ ການປ່ຽນແປງຂໍ້ມູນພະນັກງານ.',
+      features:[
+        'ບັນທຶກປະຫວັດສະຖານະ (ເຊັ່ນ ທົດລອງງານ → ສົມບູນ), ປັບຍອດວັນພັກ, ປ່ຽນອີເມວເຂົ້າລະບົບ',
+        'ໝາຍບັນຊີທົດລອງ ເພື່ອບໍ່ໃຫ້ນັບເຂົ້າລາຍງານ',
+        'ປິດໃຊ້ງານ ຫຼື ລຶບຖາວອນ — ຕ້ອງພິມຄຳຢືນຢັນກ່ອນ ປ້ອງກັນການກົດຜິດ'
+      ],
+      benefit:['ຂໍ້ມູນພະນັກງານຢູ່ບ່ອນດຽວ, ຊັດເຈນ, ທັນສະໄໝ']
+    },
+    { id:'mod-c3', type:'module', group:'C', icon:'shield',
+      title:'ຈັດການສິດ (Role & Permission)',
+      tagline:'ກຳນົດວ່າໃຜ ເຫັນ ແລະ ເຮັດຫຍັງໄດ້ໃນລະບົບ.',
+      features:[
+        'ສ້າງ / ແກ້ໄຂ / ລຶບ ບົດບາດ (Role) ເຊັ່ນ ຜູ້ບໍລິຫານ, HR, IT, ເລຂາ, ແມ່ບ້ານ',
+        'ກຳນົດສິດລະອຽດຕໍ່ເມນູ: "ເບິ່ງ" / "ຈັດການ" / "ຈັດການສູງສຸດ" ສຳລັບແຕ່ລະເມນູ',
+        'ກຳນົດສິດອະນຸມັດ ລະດັບພະແນກ ແລະ ລະດັບສາຂາ',
+        'ເມນູທີ່ບໍ່ມີສິດ ຈະຖືກເຊື່ອງອັດຕະໂນມັດ'
+      ],
+      benefit:['ປົກປ້ອງຂໍ້ມູນລັບ (ເຊັ່ນ ເງິນເດືອນ), ແຕ່ລະຄົນເຫັນສະເພາະສິ່ງທີ່ຈຳເປັນ']
+    },
+    { id:'mod-c4', type:'module', group:'C', icon:'building',
+      title:'ຈັດການສາຂາ ແລະ ຕຳແໜ່ງ',
+      tagline:'ຄຸ້ມຄອງໂຄງສ້າງສາຂາ ແລະ ຕຳແໜ່ງງານຂອງບໍລິສັດ.',
+      features:[
+        'ເພີ່ມ / ແກ້ໄຂ / ລຶບ ສາຂາ: ລະຫັດ, ຊື່ລາວ/ອັງກິດ',
+        'ກຳນົດພິກັດ GPS ຂອງແຕ່ລະສາຂາ — ໃຊ້ກວດສະຖານທີ່ Check-in',
+        'ຈັດການຕຳແໜ່ງງານຂອງແຕ່ລະສາຂາ (ຊື່ລາວ/ອັງກິດ, ລາຍລະອຽດ)'
+      ],
+      benefit:['ໂຄງສ້າງອົງກອນຖືກຕ້ອງ, ຮອງຮັບການຂະຫຍາຍສາຂາໃນອະນາຄົດ']
+    },
+    { id:'mod-c5', type:'module', group:'C', icon:'layers',
+      title:'ຈັດການພະແນກ (Department)',
+      tagline:'ຄຸ້ມຄອງລາຍຊື່ພະແນກຂອງແຕ່ລະສາຂາ.',
+      features:[
+        'ເພີ່ມ / ແກ້ໄຂ ພະແນກ: ຊື່ລາວ/ອັງກິດ, ລາຍລະອຽດ, ສາຂາທີ່ສັງກັດ, ໝາຍເຫດ',
+        'ເບິ່ງໄດ້ວ່າໃຜສ້າງ ແລະ ສ້າງເມື່ອໃດ'
+      ],
+      benefit:['ໂຄງສ້າງພະແນກຊັດເຈນ ງ່າຍຕໍ່ການຄຸ້ມຄອງສິດ ແລະ ການອອກລາຍງານ']
+    },
+
+    // Group D
+    { id:'mod-d1a', type:'module', group:'D', icon:'bar-chart',
+      tocTitle:'ລາຍງານການເຂົ້າວຽກປະຈຳເດືອນ',
+      title:'ລາຍງານການເຂົ້າວຽກປະຈຳເດືອນ — 1/2',
+      tagline:'ລະບົບສ້າງລາຍງານໃຫ້ອັດຕະໂນມັດທຸກມື້ ເວລາ 23:30.',
+      features:[
+        'ກັ່ນຕອງຕາມ ສາຂາ / ພະແນກ / ເດືອນ',
+        'ສະຫຼຸບ: ມາຊ້າທັງໝົດ, ມາຊ້າເກີນ 4 ຄັ້ງ, ລືມສະແກນ',
+        'ຄັດເລືອກ ພະນັກງານດີເດັ່ນ ຂອງເດືອນ',
+        'ຄິດໄລ່ເງິນປັບໃໝ ກໍລະນີມາຊ້າ ແລະ ລືມສະແກນ (ກີບ) ໃຫ້ອັດຕະໂນມັດ'
+      ]
+    },
+    { id:'mod-d1b', type:'module', group:'D', icon:'bar-chart', tocSkip:true,
+      title:'ລາຍງານການເຂົ້າວຽກປະຈຳເດືອນ — 2/2',
+      tagline:'ເບິ່ງລາຍລະອຽດລາຍບຸກຄົນ ແບບປະຕິທິນສີ.',
+      features:[
+        'ປະຕິທິນສີລາຍບຸກຄົນ: ມາວຽກ, ມາຊ້າ, ລາພັກ, ວຽກນອກ, ຝຶກອົບຮົມ, ມາວຽກວັນພັກ',
+        'ພິມ PDF ພ້ອມຊ່ອງ ຜູ້ສ້າງລາຍງານ ແລະ ຜູ້ກວດ'
+      ],
+      benefit:['ເຫັນພຶດຕິກຳການມາວຽກຂອງແຕ່ລະຄົນຢ່າງລະອຽດ ຫຼຸດວຽກຄິດໄລ່ເງິນປັບໃໝດ້ວຍມື']
+    },
+    { id:'mod-d2', type:'module', group:'D', icon:'clock',
+      title:'ລາຍງານອອກວຽກກ່ອນໂມງ',
+      tagline:'ຕິດຕາມພະນັກງານທີ່ອອກວຽກກ່ອນເວລາທີ່ກຳນົດ.',
+      features:[
+        'ລາຍຊື່ຜູ້ອອກກ່ອນເວລາ ພ້ອມຈຳນວນຄັ້ງ ແລະ ເວລາອອກ',
+        'ໃຊ້ກົດເກນເວລາອອກວຽກມາດຕະຖານ (ພະນັກງານທົ່ວໄປ ແລະ ແມ່ບ້ານແຍກກັນ)',
+        'ລະບົບກວດໃບລາຕອນແລງໃຫ້ອັດຕະໂນມັດ ກ່ອນນັບເປັນອອກກ່ອນໂມງ'
+      ],
+      benefit:['ຮູ້ພຶດຕິກຳການອອກວຽກກ່ອນເວລາ ໂດຍບໍ່ຕ້ອງກວດດ້ວຍມື']
+    },
+    { id:'mod-d3', type:'module', group:'D', icon:'doc',
+      title:'ລາຍງານການລາພັກ',
+      tagline:'ສະຫຼຸບການລາ ແລະ ການເຄື່ອນໄຫວພະນັກງານ ລາຍເດືອນ.',
+      features:[
+        'ສະຫຼຸບ ວັນພັກເດືອນກ່ອນ → ການໃຊ້ → ຍອດເຫຼືອ',
+        'ກັ່ນຕອງຕາມແຂວງ / ສາຂາ',
+        'ພິມ PDF ແບບເອກະສານລາຊະການ',
+        'ລາຍງານໃບລາທີ່ຖືກປະຕິເສດ ພ້ອມເຫດຜົນ ແລະ ຜູ້ປະຕິເສດ'
+      ],
+      benefit:['ຕິດຕາມການໃຊ້ວັນພັກຂອງທັງບໍລິສັດໄດ້ງ່າຍ ແລະ ຖືກຕ້ອງ']
+    },
+    { id:'mod-d4', type:'module', group:'D', icon:'calendar-check',
+      title:'ມື້ພັກຂອງພະນັກງານ (Leave Balance)',
+      tagline:'ເບິ່ງສິດ ແລະ ຍອດວັນພັກຄົງເຫຼືອຂອງແຕ່ລະຄົນ.',
+      features:[
+        'ເບິ່ງສິດທັງໝົດຕາມນະໂຍບາຍ ແຍກຕາມປະເພດການລາ',
+        'ເບິ່ງຍອດວັນພັກຄົງເຫຼືອຂອງແຕ່ລະຄົນ ແບບທັນທີ',
+        'ກັ່ນຕອງຕາມສາຂາ ຫຼື ຄົ້ນຫາລາຍບຸກຄົນ'
+      ],
+      benefit:['ຮູ້ຍອດວັນພັກຂອງພະນັກງານທຸກຄົນ ໂດຍບໍ່ຕ້ອງນັບດ້ວຍມື']
+    },
+    { id:'mod-d5', type:'module', group:'D', icon:'hash',
+      title:'ເລກທີໃບລາພັກ',
+      tagline:'ອອກເລກທີໃບລາພັກທາງການ ໃຫ້ອັດຕະໂນມັດ.',
+      features:[
+        'ອອກເລກທີໃຫ້ອັດຕະໂນມັດ ເມື່ອໃບລາອະນຸມັດຄົບ',
+        'ນັບເລກໃໝ່ທຸກປີ ແຍກຕາມສາຂາ (ເລີ່ມໃຊ້ 1/10/2026)',
+        'ຄົ້ນຫາຕາມຊື່ ຫຼື ເລກທີ, ເບິ່ງເລກລ່າສຸດຂອງແຕ່ລະສາຂາ',
+        'ອອກເລກທີໃຫ້ໃບລາເກົ່າທີ່ຍັງບໍ່ມີເລກໄດ້ (ໃບທີ່ມີເລກແລ້ວບໍ່ປ່ຽນ)',
+        'ພິມ PDF'
+      ],
+      benefit:['ເອກະສານມີເລກທີຢ່າງເປັນລະບົບ ກົງກັບລະບຽບບໍລິສັດ']
+    },
+    { id:'mod-d6', type:'module', group:'D', icon:'map-pin',
+      title:'ລາຍງານການອອກວຽກນອກ',
+      tagline:'ສະຫຼຸບການອອກວຽກນອກຂອງພະນັກງານແຕ່ລະຄົນ.',
+      features:[
+        'ສະຫຼຸບຈຳນວນຄັ້ງ ແຍກຕາມປະເພດກິດຈະກຳ',
+        'ສະຫຼຸບຈຳນວນມື້ລວມ ຂອງແຕ່ລະຄົນ',
+        'ກັ່ນຕອງຕາມສາຂາ ແລະ ເດືອນ / ໝົດປີ'
+      ],
+      benefit:['ເຫັນພາບລວມການເຄື່ອນໄຫວອອກວຽກນອກ ຂອງທັງບໍລິສັດ']
+    },
+    { id:'mod-d7', type:'module', group:'D', icon:'swap',
+      title:'ລາຍງານການຍົກຍ້າຍ (Movements)',
+      tagline:'ບັນທຶກການຍ້າຍ / ເລື່ອນຕຳແໜ່ງ / ລາອອກ ຫຼັງອະນຸມັດເປັນທາງການ.',
+      features:[
+        'ບັນທຶກຂໍ້ມູນເກົ່າ → ຂໍ້ມູນໃໝ່: ສາຂາ, ພະແນກ, ຕຳແໜ່ງ, ປະເພດ, ເງິນເດືອນ',
+        'ຮອງຮັບການຮັກສາການຊົ່ວຄາວ (ມີວັນສິ້ນສຸດ)',
+        'ບັງຄັບໃສ່ ເລກທີເອກະສານ, ວັນທີເອກະສານ, ຜູ້ອະນຸມັດລະດັບ C-Level, ເຫດຜົນ ແລະ ໄຟລ໌ແນບ',
+        'ເບິ່ງ Timeline ປະຫວັດການເຄື່ອນໄຫວຂອງແຕ່ລະຄົນ',
+        'ຍົກເລີກໄດ້ສະເພາະລາຍການລ່າສຸດ — ບໍ່ລຶບປະຫວັດ'
+      ],
+      benefit:['ມີປະຫວັດການເຄື່ອນໄຫວຄົບ ກວດສອບ (audit) ຍ້ອນຫຼັງໄດ້ທຸກເມື່ອ']
+    },
+
+    // Group E
+    { id:'mod-e1', type:'module', group:'E', icon:'book',
+      title:'ຈັດການນະໂຍບາຍ (Leave Policy)',
+      tagline:'ກຳນົດກົດລະບຽບການລາຂອງບໍລິສັດ ໃນລະບົບ.',
+      features:[
+        'ສ້າງ / ແກ້ໄຂ / ປິດ / ລຶບ ນະໂຍບາຍ (ເຊັ່ນ ລາພັກປະຈຳປີ)',
+        'ເລືອກວິທີນັບວັນ: ວັນລັດຖະການ (ຂ້າມເສົາ-ອາທິດ ແລະ ວັນພັກ) ຫຼື ວັນປະຕິທິນ',
+        'ກຳນົດຈຳນວນວັນລາ ຕາມສະຖານະພະນັກງານ (ຝຶກງານ, ທົດລອງງານ, ສົມບູນ, ສັນຍາຈ້າງ)',
+        'ກຳນົດວ່າຕ້ອງມີເອກະສານຢືນຢັນຫຼືບໍ່ ແລະ ກຳນົດຜູ້ມີສິດ',
+        'ຄິດສິດປີທຳອິດ ຕາມອັດຕາສ່ວນວັນທີ່ເປັນພະນັກງານສົມບູນ'
+      ],
+      benefit:['ນະໂຍບາຍປ່ຽນໄດ້ເອງ ໂດຍບໍ່ຕ້ອງແກ້ລະບົບ ຄິດໄລ່ວັນພັກຍຸຕິທຳ ແລະ ຖືກຕ້ອງ']
+    },
+    { id:'mod-e2', type:'module', group:'E', icon:'calendar',
+      title:'ຈັດການມື້ພັກ (Holiday Calendar)',
+      tagline:'ຄຸ້ມຄອງປະຕິທິນວັນພັກຂອງບໍລິສັດ.',
+      features:[
+        'ເພີ່ມ / ແກ້ໄຂ / ຍົກເລີກ ວັນພັກ ຫຼາຍປະເພດ (ທາງການ, ບຸນປະເພນີ, ສາສະໜາ, ສາກົນ, ວັນຫຍຸດບໍລິສັດ)',
+        'ຮອງຮັບວັນທີຄົງທີ່, ຈັນທະຄະຕິ, ຫຼື ປະກາດພິເສດ',
+        'ຕັ້ງວັນພັກຫຼາຍມື້ຕິດກັນ ຫຼື ເຄິ່ງມື້ໄດ້',
+        'ກຳນົດສະເພາະບາງສາຂາໄດ້',
+        'ບັນທຶກວັນພັກຊົດເຊີຍ ພ້ອມເລກທີແຈ້ງການ'
+      ],
+      benefit:['ລາຍງານເຂົ້າວຽກ ແລະ ການນັບວັນລາ ຖືກຕ້ອງ ຕາມປະຕິທິນຈິງ']
+    },
+    { id:'mod-e3a', type:'module', group:'E', icon:'gear',
+      tocTitle:'ຕັ້ງຄ່າລະບົບ (System Setting)',
+      title:'ຕັ້ງຄ່າລະບົບ (System Setting) — 1/2',
+      tagline:'ຄວບຄຸມການຕັ້ງຄ່າຫຼັກຂອງລະບົບ (ສະເພາະຜູ້ເບິ່ງແຍງລະບົບ).',
+      features:[
+        'ເປີດ/ປິດ ໜ້າລົງທະບຽນພະນັກງານໃໝ່, ຕັ້ງລະຫັດຜ່ານ, ສຳເນົາລິ້ງສົ່ງໃຫ້ພະນັກງານ',
+        'ເປີດ/ປິດ ສິດໃຫ້ພະນັກງານແກ້ໄຂຂໍ້ມູນສ່ວນຕົວເອງ',
+        'ບັງຄັບອອກຈາກລະບົບຜູ້ໃຊ້ທັງໝົດທັນທີ — ໃຊ້ໃນກໍລະນີສຸກເສີນດ້ານຄວາມປອດໄພ',
+        'ຄິດໄລ່ຂໍ້ມູນຄືນ (ຍອດວັນພັກ, ລາຍງານລາພັກ, ລາຍງານເຂົ້າວຽກ) ຕາມເດືອນ ເມື່ອມີການປ່ຽນກົດລະບຽບ'
+      ]
+    },
+    { id:'mod-e3b', type:'module', group:'E', icon:'gear', tocSkip:true,
+      title:'ຕັ້ງຄ່າລະບົບ (System Setting) — 2/2',
+      tagline:'ຄຸ້ມຄອງການເດີນທາງທຸລະກິດ ແລະ ຂໍ້ອ້າງອີງເອກະສານ.',
+      features:[
+        'ການເດີນທາງທຸລະກິດ (Business Trip): ສ້າງແຜນການເດີນທາງ, ເລືອກພະນັກງານທີ່ໄປ, ຕິດຕາມສະຖານະ (ກຳລັງຈະໄປ / ກຳລັງເດີນທາງ / ໄປແລ້ວ)',
+        'ຈັດການຂໍ້ອ້າງອີງກົດໝາຍ/ລະບຽບ ທີ່ສະແດງຢູ່ຫົວເອກະສານ ແຍກ 6 ປະເພດ (ລາພັກ, ອອກວຽກນອກ, OT ແລະ ອື່ນໆ)',
+        'ຈັດລຳດັບຂໍ້ອ້າງອີງແບບລາກວາງ',
+        'ປິດໃຊ້ງານຂໍ້ອ້າງອີງເກົ່າໄດ້ ໂດຍບໍ່ລຶບ — ເພື່ອກວດເອກະສານເກົ່າ'
+      ],
+      benefit:['ຄວບຄຸມການຕັ້ງຄ່າ ແລະ ຄວາມຖືກຕ້ອງຂອງເອກະສານ ຈາກຈຸດດຽວ']
+    },
+    { id:'mod-e4', type:'module', group:'E', icon:'key',
+      title:'ເຂົ້າລະບົບ ແລະ ລົງທະບຽນ',
+      tagline:'ຄວບຄຸມການເຂົ້າເຖິງລະບົບ ແລະ ການລົງທະບຽນພະນັກງານໃໝ່.',
+      features:[
+        'ເຂົ້າລະບົບໄດ້ສະເພາະຜູ້ທີ່ມີສິດ; ຜູ້ບໍ່ມີສິດຈະຖືກແຈ້ງໃຫ້ຕິດຕໍ່ HR ຫຼື IT',
+        'ລົງທະບຽນພະນັກງານໃໝ່ຜ່ານຟອມອອນລາຍ ປ້ອງກັນດ້ວຍລະຫັດຜ່ານ',
+        'ກວດຮູບແບບເບີໂທ ແລະ ອີເມວໃຫ້ອັດຕະໂນມັດ',
+        'ເລືອກທີ່ຢູ່ ແຂວງ → ເມືອງ → ບ້ານ ຈາກລາຍການ'
+      ],
+      benefit:['ພະນັກງານປ້ອນຂໍ້ມູນເອງໄດ້, HR ຫຼຸດວຽກປ້ອນຂໍ້ມູນຊ້ຳຊ້ອນ']
+    },
+
+    { id:'security', type:'list',
+      icon:'lock',
+      title:'ຄວາມປອດໄພ ແລະ ການຄວບຄຸມສິດ',
+      tagline:'ສະຫຼຸບຈາກ ການຈັດການສິດ ແລະ ການຕັ້ງຄ່າລະບົບ',
+      items:[
+        {icon:'shield', text:'ກຳນົດສິດການເຫັນ ແລະ ການຈັດການ ລະອຽດຕໍ່ເມນູ ແຍກຕາມບົດບາດ (Role)'},
+        {icon:'menu', text:'ເມນູທີ່ບໍ່ມີສິດ ຈະຖືກເຊື່ອງອັດຕະໂນມັດ ປ້ອງກັນການເຫັນຂໍ້ມູນລັບ'},
+        {icon:'building', text:'ຄວບຄຸມສິດອະນຸມັດ ຕາມລະດັບພະແນກ ແລະ ສາຂາ'},
+        {icon:'bolt', text:'ບັງຄັບອອກຈາກລະບົບຜູ້ໃຊ້ທັງໝົດໄດ້ທັນທີ ກໍລະນີສຸກເສີນ'},
+        {icon:'users', text:'ການລຶບຖາວອນ ຫຼື ປິດໃຊ້ງານພະນັກງານ ຕ້ອງພິມຄຳຢືນຢັນກ່ອນ ປ້ອງກັນການກົດຜິດ'}
+      ]
+    },
+    { id:'automation', type:'list',
+      icon:'bolt',
+      title:'ສິ່ງທີ່ລະບົບເຮັດອັດຕະໂນມັດ',
+      tagline:'ວຽກທີ່ລະບົບຈັດການແທນຄົນ ໂດຍບໍ່ຕ້ອງມີໃຜມາຄິດເອງ',
+      items:[
+        {icon:'calendar-check', text:'ຄິດຈຳນວນວັນລາ ແລະ ຄືນຍອດວັນພັກ ເມື່ອແກ້ໄຂ ຫຼື ຍົກເລີກໃບລາ'},
+        {icon:'map-pin', text:'ຄິດຈຳນວນມື້ໃໝ່ ເມື່ອແກ້ໄຂວັນສິ້ນສຸດການອອກວຽກນອກ'},
+        {icon:'clock', text:'ສ້າງລາຍງານການເຂົ້າວຽກປະຈຳເດືອນ ທຸກມື້ ເວລາ 23:30'},
+        {icon:'bar-chart', text:'ຄິດໄລ່ເງິນປັບໃໝ ກໍລະນີມາຊ້າ ແລະ ລືມສະແກນ'},
+        {icon:'doc', text:'ກວດໃບລາໃຫ້ອັດຕະໂນມັດ ກ່ອນນັບເປັນອອກວຽກກ່ອນໂມງ'},
+        {icon:'hash', text:'ອອກເລກທີໃບລາພັກ ເມື່ອອະນຸມັດຄົບ'},
+        {icon:'shield', text:'ເຊື່ອງເມນູທີ່ບໍ່ມີສິດອັດຕະໂນມັດ ຕາມບົດບາດຜູ້ໃຊ້'},
+        {icon:'key', text:'ກວດຮູບແບບເບີໂທ ແລະ ອີເມວ ຕອນລົງທະບຽນ'}
+      ]
+    },
+
+    { id:'roadmap', type:'roadmap' },
+    { id:'summary', type:'summary' }
+  ];
+
+  /* ================= RENDER FUNCTIONS ================= */
+
+  function renderCover(){
+    return ''+
+    '<div class="slide cover" id="cover">'+
+      '<div class="slide-inner">'+
+        '<div class="cover-tag">'+ICON('monitor')+' Web Admin Presentation</div>'+
+        '<h1>ລະບົບບໍລິຫານບຸກຄະລາກອນ<br><span>SSMI HRM</span></h1>'+
+        '<p class="cover-sub">ພາກສ່ວນ Web Admin — ນຳສະເໜີໂມດູນ ແລະ ຄວາມສາມາດຂອງລະບົບ</p>'+
+        '<div class="cover-company">ສະຖາບັນການເງິນຈຸລະພາກ ທີ່ຮັບເງິນຝາກ ສິນຊັບເມືອງເໜືອ ຈຳກັດ (SSMI)'+
+          '<div class="cover-date">ວັນທີ 24 ກັນຍາ 2026</div>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+  }
+
+  function renderOverview(){
+    return ''+
+    '<div class="slide" id="overview">'+
+      '<div class="slide-inner">'+
+        '<div class="eyebrow">'+ICON('monitor')+' ພາບລວມລະບົບ</div>'+
+        '<h2 class="module-title" style="font-size:var(--h2-size)">ລະບົບມີ 2 ສ່ວນ ເຮັດວຽກຮ່ວມກັນ</h2>'+
+        '<div class="overview-grid">'+
+          '<div class="overview-card">'+
+            '<div class="oc-icon">'+ICON('smartphone')+'</div>'+
+            '<h3>Mobile App</h3>'+
+            '<p>ພະນັກງານໃຊ້ Check-in / Check-out ແລະ ຍື່ນຄຳຮ້ອງ (ລາພັກ, ອອກວຽກນອກ) ຜ່ານແອັບມືຖື.</p>'+
+          '</div>'+
+          '<div class="overview-card focus">'+
+            '<div class="oc-icon">'+ICON('monitor')+'</div>'+
+            '<h3>Web Admin</h3>'+
+            '<p>HR, ຫົວໜ້າ ແລະ ຜູ້ບໍລິຫານ ໃຊ້ອະນຸມັດຄຳຮ້ອງ, ຈັດການຂໍ້ມູນພະນັກງານ ແລະ ເບິ່ງລາຍງານ.</p>'+
+          '</div>'+
+        '</div>'+
+        '<div class="overview-note">'+ICON('bolt')+' ການນຳສະເໜີສະບັບນີ້ ເນັ້ນສະເພາະ ພາກສ່ວນ Web Admin</div>'+
+      '</div>'+
+    '</div>';
+  }
+
+  function renderToc(){
+    var order = ['A','B','C','D','E'];
+    var cards = order.map(function(g){
+      var items = DATA.filter(function(s){ return s.type==='module' && s.group===g && !s.tocSkip; });
+      var unitLabel = (g==='D') ? 'ລາຍງານ' : 'ໂມດູນ';
+      return ''+
+      '<div class="toc-card">'+
+        '<div class="toc-card-head">'+
+          '<div class="toc-letter">'+g+'</div>'+
+          '<div><div class="toc-name">'+GROUP_LABELS[g]+'</div><div class="toc-count">'+items.length+' '+unitLabel+'</div></div>'+
+        '</div>'+
+        '<ul class="toc-list">'+
+          items.map(function(it){ return '<li><a data-jump="'+it.id+'">'+(it.tocTitle||it.title)+'</a></li>'; }).join('')+
+        '</ul>'+
+      '</div>';
+    }).join('');
+
+    return ''+
+    '<div class="slide" id="toc">'+
+      '<div class="slide-inner">'+
+        '<div class="eyebrow">'+ICON('menu')+' ສາລະບານ</div>'+
+        '<h2 class="module-title" style="font-size:var(--h2-size)">5 ກຸ່ມເມນູ ໃນລະບົບ Web Admin</h2>'+
+        '<div class="toc-grid">'+cards+'</div>'+
+      '</div>'+
+    '</div>';
+  }
+
+  function renderModule(s){
+    return ''+
+    '<div class="slide" id="'+s.id+'" data-group="'+s.group+'">'+
+      '<div class="slide-inner">'+
+        '<div class="eyebrow">'+ICON('menu')+' ກຸ່ມ '+s.group+' · '+GROUP_LABELS[s.group]+'</div>'+
+        '<div class="module-head">'+
+          '<div class="module-icon">'+ICON(s.icon)+'</div>'+
+          '<h2 class="module-title">'+s.title+'</h2>'+
+        '</div>'+
+        '<p class="tagline">'+s.tagline+'</p>'+
+        '<div class="section-label">ເຮັດຫຍັງໄດ້</div>'+
+        features(s.features)+
+        benefitBox(s.benefit)+
+      '</div>'+
+    '</div>';
+  }
+
+  function renderList(s){
+    var items = s.items.map(function(it){
+      return '<li>'+ICON(it.icon,'li-icon')+it.text+'</li>';
+    }).join('');
+    return ''+
+    '<div class="slide" id="'+s.id+'">'+
+      '<div class="slide-inner">'+
+        '<div class="module-head">'+
+          '<div class="list-slide-icon">'+ICON(s.icon)+'</div>'+
+          '<h2 class="module-title">'+s.title+'</h2>'+
+        '</div>'+
+        '<p class="tagline">'+s.tagline+'</p>'+
+        '<ul class="big-list">'+items+'</ul>'+
+      '</div>'+
+    '</div>';
+  }
+
+  function renderRoadmap(){
+    var items = [
+      {icon:'doc', title:'ຂ່າວສານ (News)', desc:'ສ້າງ ແລະ ແກ້ໄຂຂ່າວ ພ້ອມແນບເອກະສານ ຫຼື ຮູບ — ພັດທະນາໜ້າແລ້ວ, ກຳລັງກະກຽມເປີດໃຊ້.'},
+      {icon:'chat', title:'ແຊັດ (Chat)', desc:'ຊ່ອງທາງສື່ສານພາຍໃນລະບົບ ລະຫວ່າງພະນັກງານ ແລະ ຫົວໜ້າ.'},
+      {icon:'book', title:'ກົດໝາຍ (Law)', desc:'ບ່ອນອ້າງອີງກົດໝາຍ ແລະ ລະບຽບພາຍໃນ ໃຫ້ພະນັກງານຄົ້ນຫາໄດ້.'},
+      {icon:'profile', title:'ໂປຣໄຟລ໌ (Profile)', desc:'ໜ້າສະແດງຂໍ້ມູນສ່ວນຕົວແບບໃໝ່ ສຳລັບພະນັກງານ.'},
+      {icon:'coins', title:'ຄິດໄລ່ເງິນເດືອນ (Payroll)', desc:'ຄິດໄລ່ເງິນເດືອນພະນັກງານ ໂດຍອີງໃສ່ຂໍ້ມູນການເຂົ້າວຽກ ແລະ ການລາ ທີ່ມີໃນລະບົບແລ້ວ.'},
+      {icon:'percent', title:'ຄິດໄລ່ອັດຕາກິນ (OT ອອກວຽກນອກ)', desc:'ຄິດໄລ່ອັດຕາເບ້ຍລ້ຽງ/ອັດຕາກິນ ກໍລະນີອອກວຽກນອກ (OT) ຕໍ່ຈາກຄຳຮ້ອງທີ່ອະນຸມັດແລ້ວ.'}
+    ];
+    var cards = items.map(function(it){
+      return ''+
+      '<div class="roadmap-card">'+
+        '<div class="rc-icon">'+ICON(it.icon)+'</div>'+
+        '<div><h3>'+it.title+'</h3><p>'+it.desc+'</p><span class="roadmap-badge">ກຳລັງພັດທະນາ</span></div>'+
+      '</div>';
+    }).join('');
+    return ''+
+    '<div class="slide" id="roadmap">'+
+      '<div class="slide-inner">'+
+        '<div class="module-head">'+
+          '<div class="list-slide-icon">'+ICON('rocket')+'</div>'+
+          '<h2 class="module-title">ໂມດູນທີ່ກຳລັງພັດທະນາ</h2>'+
+        '</div>'+
+        '<p class="tagline">ແຜນຕໍ່ໄປ ເພື່ອຂະຫຍາຍຄວາມສາມາດຂອງລະບົບໃນອະນາຄົດ</p>'+
+        '<div class="roadmap-grid">'+cards+'</div>'+
+      '</div>'+
+    '</div>';
+  }
+
+  function renderSummary(){
+    var items = [
+      'ຂໍ້ມູນພະນັກງານ ແລະ ການເຂົ້າວຽກ ຢູ່ບ່ອນດຽວ ຄົບ ແລະ ທັນສະໄໝ',
+      'ການອະນຸມັດ (ລາພັກ, ອອກວຽກນອກ) ໄວຂຶ້ນ ໂດຍບໍ່ຕ້ອງໃຊ້ເຈ້ຍ',
+      'ຄວບຄຸມສິດການເຂົ້າເຖິງຂໍ້ມູນຢ່າງລະອຽດ ປອດໄພ',
+      'ມີລາຍງານພ້ອມໃຊ້ 7 ລາຍງານ ຊ່ວຍການຕັດສິນໃຈຂອງຜູ້ບໍລິຫານ'
+    ];
+    var list = items.map(function(t,i){
+      return '<li><span class="num">'+(i+1)+'</span><span>'+t+'</span></li>';
+    }).join('');
+    return ''+
+    '<div class="slide" id="summary">'+
+      '<div class="slide-inner">'+
+        '<div class="module-head">'+
+          '<div class="list-slide-icon">'+ICON('check-circle')+'</div>'+
+          '<h2 class="module-title">ສະຫຼຸບ</h2>'+
+        '</div>'+
+        '<p class="tagline">ປະໂຫຍດຫຼັກຂອງລະບົບ SSMI HRM — Web Admin</p>'+
+        '<ul class="summary-list">'+list+'</ul>'+
+        '<div class="thanks">ຂອບໃຈສຳລັບການຮັບຟັງ</div>'+
+      '</div>'+
+    '</div>';
+  }
+
+  /* ================= BUILD ================= */
+  var html = '';
+  DATA.forEach(function(s){
+    if(s.type==='cover') html += renderCover();
+    else if(s.type==='overview') html += renderOverview();
+    else if(s.type==='toc') html += renderToc();
+    else if(s.type==='module') html += renderModule(s);
+    else if(s.type==='list') html += renderList(s);
+    else if(s.type==='roadmap') html += renderRoadmap();
+    else if(s.type==='summary') html += renderSummary();
+  });
+  document.getElementById('slides').innerHTML = html;
+
+  // footer (page number) on every slide
+  var allSlides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var total = allSlides.length;
+  allSlides.forEach(function(el,i){
+    var footer = document.createElement('div');
+    footer.className = 'slide-footer';
+    footer.innerHTML = '<span><b>SSMI HRM</b> — Web Admin</span><span>ໜ້າ '+(i+1)+' / '+total+'</span>';
+    el.appendChild(footer);
+  });
+
+  /* ================= NAVIGATION ================= */
+  var current = 0;
+  var progressFill = document.getElementById('progressFill');
+  var counterEl = document.getElementById('slideCounter');
+  var btnPrev = document.getElementById('btnPrev');
+  var btnNext = document.getElementById('btnNext');
+
+  function goTo(idx){
+    if(idx < 0) idx = 0;
+    if(idx > total-1) idx = total-1;
+    allSlides[current].classList.remove('active');
+    current = idx;
+    allSlides[current].classList.add('active');
+    var inner = allSlides[current].querySelector('.slide-inner');
+    if(inner) inner.scrollTop = 0;
+    progressFill.style.width = ((current+1)/total*100)+'%';
+    counterEl.textContent = (current+1)+' / '+total;
+    btnPrev.disabled = current === 0;
+    btnNext.disabled = current === total-1;
+  }
+
+  function next(){ goTo(current+1); }
+  function prev(){ goTo(current-1); }
+
+  btnNext.addEventListener('click', next);
+  btnPrev.addEventListener('click', prev);
+  document.getElementById('btnTocJump').addEventListener('click', function(){
+    var idx = allSlides.findIndex(function(el){ return el.id==='toc'; });
+    goTo(idx);
+  });
+
+  document.addEventListener('click', function(e){
+    var jump = e.target.closest && e.target.closest('[data-jump]');
+    if(jump){
+      var id = jump.getAttribute('data-jump');
+      var idx = allSlides.findIndex(function(el){ return el.id===id; });
+      if(idx > -1) goTo(idx);
+    }
+  });
+
+  document.addEventListener('keydown', function(e){
+    if(e.key==='ArrowRight' || e.key===' ' || e.key==='Spacebar'){ e.preventDefault(); next(); }
+    else if(e.key==='ArrowLeft'){ e.preventDefault(); prev(); }
+    else if(e.key==='Home'){ e.preventDefault(); goTo(0); }
+    else if(e.key==='End'){ e.preventDefault(); goTo(total-1); }
+  });
+
+  // touch swipe
+  var touchStartX = null;
+  document.addEventListener('touchstart', function(e){
+    touchStartX = e.changedTouches[0].clientX;
+  }, {passive:true});
+  document.addEventListener('touchend', function(e){
+    if(touchStartX===null) return;
+    var dx = e.changedTouches[0].clientX - touchStartX;
+    if(dx < -50) next();
+    else if(dx > 50) prev();
+    touchStartX = null;
+  }, {passive:true});
+
+  goTo(0);
+})();
+</script>
+</body>
+</html>
