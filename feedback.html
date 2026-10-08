@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="lo">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HRM Admin Feedback - Post Update</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="icon" type="image/png" href="https://ssmilaos.com/wp-content/uploads/2025/09/SSMI-LOGO-LAST-VERSION-1024x1024.png">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Noto Sans Lao"', 'sans-serif'],
+                    },
+                    colors: {
+                        hrmPrimary: '#1d4ed8', // Blue-700
+                        hrmSecondary: '#3b82f6', // Blue-500
+                        hrmBg: '#f8fafc', // Slate-50
+                        hrmCard: '#ffffff', // White
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Noto Sans Lao', sans-serif;
+            background-color: #f8fafc;
+            color: #334155; /* Slate-700 */
+        }
+        /* Custom Radio Button Styling for Light Theme */
+        input[type="radio"] {
+            appearance: none;
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 50%;
+            border: 2px solid #cbd5e1; /* Slate-300 */
+            background-color: #ffffff;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+        input[type="radio"]:checked {
+            background-color: #2563eb; /* Blue-600 */
+            border-color: #2563eb;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2);
+        }
+        /* Custom Checkbox Styling for Light Theme */
+        input[type="checkbox"] {
+            appearance: none;
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 0.375rem;
+            border: 2px solid #cbd5e1;
+            background-color: #ffffff;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            position: relative;
+        }
+        input[type="checkbox"]:checked {
+            background-color: #2563eb;
+            border-color: #2563eb;
+        }
+        input[type="checkbox"]:checked::after {
+            content: '✓';
+            position: absolute;
+            color: white;
+            font-size: 1rem;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        /* Star Rating Hover Effect */
+        .star-rating label:hover,
+        .star-rating label:hover ~ label,
+        .star-rating input:checked ~ label {
+            color: #f59e0b; /* Amber-500 */
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4 sm:p-8">
+
+    <div id="customModal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-slate-900/40 backdrop-blur-sm px-4">
+        <div class="bg-white border border-slate-200 rounded-2xl p-6 max-w-sm w-full shadow-2xl transform transition-all scale-100">
+            <div class="flex items-center gap-4 mb-4">
+                <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-600 text-xl">⚠️</div>
+                <h3 class="text-lg font-bold text-slate-800" id="modalTitle">ແຈ້ງເຕືອນ</h3>
+            </div>
+            <p class="text-slate-600 text-sm mb-6" id="modalMessage">ກະລຸນາຕື່ມຂໍ້ມູນໃຫ້ຄົບຖ້ວນ</p>
+            <button type="button" onclick="closeModal()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-xl transition-colors shadow-sm">
+                ຕົກລົງ
+            </button>
+        </div>
+    </div>
+
+    <div class="max-w-4xl mx-auto bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-200">
+        
+        <header class="bg-gradient-to-r from-blue-700 to-blue-500 p-8 border-b border-blue-400 relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-8 opacity-10">
+                <svg width="100" height="100" fill="white" viewBox="0 0 24 24"><path d="M12 2L2 22h20L12 2zm0 3.8l7.2 14.2H4.8L12 5.8z"/></svg>
+            </div>
+            <div class="relative z-10 flex items-center gap-4 mb-4">
+                <div class="w-14 h-14 bg-white rounded-xl flex items-center justify-center shadow-lg p-1">
+                    <img src="https://ssmilaos.com/wp-content/uploads/2025/09/SSMI-LOGO-LAST-VERSION-1024x1024.png" alt="SSMI Logo" class="w-full h-full object-contain">
+                </div>
+                <h1 class="text-2xl sm:text-3xl font-bold text-white tracking-wide">HRM Admin Feedback</h1>
+            </div>
+            <p class="text-blue-50 relative z-10 text-sm sm:text-base mb-2">
+                (ຫຼັງການອັບເດດລະບົບ)
+            </p>
+            <p class="text-blue-100 relative z-10 text-sm sm:text-base leading-relaxed">
+                ແບບຟອມການປະເມີນນີ້ ສ້າງຂື້ນເພື່ອເກັບກຳຂໍ້ມູນຫຼັງຈາກການອັບເດດລະບົບ HRM ຫຼ້າສຸດ ໂດຍມີຈຸດປະສົງເພື່ອນຳຂໍ້ມູນທີ່ໄດ້ມາວິເຄາະ, ກວດສອບປະສິດທິພາບ ແລະ ຊອກຫາບັນຫາທີ່ອາດຈະເກີດຂຶ້ນ.
+            </p>
+            <div class="mt-5 inline-block bg-white/10 backdrop-blur-md border border-white/20 rounded-lg px-4 py-2.5 relative z-10 shadow-sm">
+                <p class="text-white text-sm font-medium">✨ ຈຸດປະສົງຫຼັກ: ຢາກຊາບຄວາມຄິດເຫັນຂອງທ່ານກ່ຽວກັບຟີເຈີໃໝ່ ແລະ ບັນຫາທີ່ພົບ.</p>
+            </div>
+        </header>
+
+        <form id="feedbackForm" class="p-6 sm:p-8 space-y-10" onsubmit="submitForm(event)" novalidate>
+            
+            <!-- ຂໍ້ມູນທົ່ວໄປ -->
+            <div class="space-y-6">
+                <h2 class="text-xl font-bold text-blue-700 flex items-center gap-2 border-b border-slate-200 pb-3"><span>📋</span> ສ່ວນທີ 1: ຂໍ້ມູນທົ່ວໄປ</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-slate-700">ພະແນກ / ຝ່າຍຂອງທ່ານ <span class="text-red-500">*</span></label>
+                        <input type="text" name="department" class="w-full bg-slate-50 border border-slate-300 text-slate-800 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all shadow-sm" placeholder="ປ້ອນຊື່ພະແນກ ຫຼື ຝ່າຍຂອງທ່ານ">
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-sm font-semibold text-slate-700">ສາຂາທີ່ປະຈຳການ <span class="text-red-500">*</span></label>
+                        <select name="branch" class="w-full bg-slate-50 border border-slate-300 text-slate-800 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all shadow-sm">
+                            <option value="">-- ກະລຸນາເລືອກ --</option>
+                            <option value="ຫຼວງພະບາງ">ຫຼວງພະບາງ</option>
+                            <option value="ໄຊຍະບູລີ">ໄຊຍະບູລີ</option>
+                            <option value="ອຸດົມໄຊ">ອຸດົມໄຊ</option>
+                            <option value="ບໍ່ແກ້ວ">ບໍ່ແກ້ວ</option>
+                            <option value="ຫຼວງນໍ້າທາ">ຫຼວງນໍ້າທາ</option>
+                            <option value="ຜົ້ງສາລີ">ຜົ້ງສາລີ</option>
+                            <option value="ນະຄອນຫຼວງວຽງຈັນ">ນະຄອນຫຼວງວຽງຈັນ</option>
+                            <option value="ໄຊສົມບູນ">ໄຊສົມບູນ</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <label class="block text-sm font-semibold text-slate-700">ອຸປະກອນທີ່ນຳໃຊ້ສ່ວນໃຫຍ່ (ເລືອກໄດ້ຫຼາຍຂໍ້) <span class="text-red-500">*</span></label>
+                    <div class="flex flex-wrap gap-6 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                        <label class="flex items-center gap-3 cursor-pointer group">
+                            <input type="checkbox" name="device" value="Desktop">
+                            <span class="text-slate-700 font-medium group-hover:text-blue-600 transition-colors">💻 ຄອມພິວເຕີ</span>
+                        </label>
+                        <label class="flex items-center gap-3 cursor-pointer group">
+                            <input type="checkbox" name="device" value="Mobile">
+                            <span class="text-slate-700 font-medium group-hover:text-blue-600 transition-colors">📱 ມືຖື</span>
+                        </label>
+                        <label class="flex items-center gap-3 cursor-pointer group">
+                            <input type="checkbox" name="device" value="Tablet">
+                            <span class="text-slate-700 font-medium group-hover:text-blue-600 transition-colors">📟 ແທັບເລັດ</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ເກນຄະແນນ -->
+            <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 flex flex-col md:flex-row gap-4 items-center justify-between sticky top-0 z-20 shadow-sm backdrop-blur-md bg-opacity-90">
+                <p class="text-sm text-slate-600 w-full text-center md:text-left">
+                    <span class="font-bold text-blue-800 block md:inline mb-2 md:mb-0">ເກນຄະແນນການປະເມີນ:</span> 
+                    <span class="inline-block bg-green-100 text-green-700 px-2.5 py-1 rounded-md font-medium mx-1 my-1">5 = ດີຫຼາຍ</span>
+                    <span class="inline-block bg-blue-100 text-blue-700 px-2.5 py-1 rounded-md font-medium mx-1 my-1">4 = ດີ</span>
+                    <span class="inline-block bg-amber-100 text-amber-700 px-2.5 py-1 rounded-md font-medium mx-1 my-1">3 = ປານກາງ</span>
+                    <span class="inline-block bg-orange-100 text-orange-700 px-2.5 py-1 rounded-md font-medium mx-1 my-1">2 = ຄວນປັບປຸງ</span>
+                    <span class="inline-block bg-red-100 text-red-700 px-2.5 py-1 rounded-md font-medium mx-1 my-1">1 = ຮີບດ່ວນ</span>
+                </p>
+            </div>
+
+            <!-- ພາກທີ 2: ປະສົບການການໃຊ້ງານທົ່ວໄປ -->
+            <div class="space-y-6">
+                <h2 class="text-xl font-bold text-blue-700 flex items-center gap-2 border-b border-slate-200 pb-3">
+                    <span class="text-2xl">🖥️</span> ສ່ວນທີ 2: ປະສົບການການໃຊ້ງານລະບົບທົ່ວໄປ
+                </h2>
+                
+                <div class="space-y-3">
+                    <p class="text-slate-700 font-semibold">1. ໜ້າຕາຂອງລະບົບ (UI) ງາມ, ສະບາຍຕາ ແລະ ຈັດວາງເມນູເຂົ້າໃຈງ່າຍ <span class="text-red-500">*</span></p>
+                    <div class="flex justify-between items-center bg-slate-50 border border-slate-200 p-4 rounded-xl max-w-lg mx-auto shadow-sm">
+                        <span class="text-xs font-medium text-slate-500 w-12 text-center">ນ້ອຍສຸດ</span>
+                        <div class="flex gap-4 sm:gap-6">
+                            <input type="radio" name="q2_1" value="1"><input type="radio" name="q2_1" value="2"><input type="radio" name="q2_1" value="3"><input type="radio" name="q2_1" value="4"><input type="radio" name="q2_1" value="5">
+                        </div>
+                        <span class="text-xs font-medium text-slate-500 w-12 text-center">ຫຼາຍສຸດ</span>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <p class="text-slate-700 font-semibold">2. ຄວາມໄວໃນການໂຫຼດໜ້າເວັບ ແລະ ການຕອບສະໜອງຂອງລະບົບ <span class="text-red-500">*</span></p>
+                    <div class="flex justify-between items-center bg-slate-50 border border-slate-200 p-4 rounded-xl max-w-lg mx-auto shadow-sm">
+                        <span class="text-xs font-medium text-slate-500 w-12 text-center">ນ້ອຍສຸດ</span>
+                        <div class="flex gap-4 sm:gap-6">
+                            <input type="radio" name="q2_2" value="1"><input type="radio" name="q2_2" value="2"><input type="radio" name="q2_2" value="3"><input type="radio" name="q2_2" value="4"><input type="radio" name="q2_2" value="5">
+                        </div>
+                        <span class="text-xs font-medium text-slate-500 w-12 text-center">ຫຼາຍສຸດ</span>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <p class="text-slate-700 font-semibold">3. ເມນູ/ການສະຫຼັບໜ້າ (Navigation) ເຮັດວຽກປົກກະຕິ (ບໍ່ເຄີຍຄ້າງ, ບໍ່ຕ້ອງ reload ໃໝ່) <span class="text-red-500">*</span></p>
+                    <div class="flex justify-between items-center bg-slate-50 border border-slate-200 p-4 rounded-xl max-w-lg mx-auto shadow-sm">
+                        <span class="text-xs font-medium text-slate-500 w-12 text-center">ນ້ອຍສຸດ</span>
+                        <div class="flex gap-4 sm:gap-6">
+                            <input type="radio" name="q2_nav" value="1"><input type="radio" name="q2_nav" value="2"><input type="radio" name="q2_nav" value="3"><input type="radio" name="q2_nav" value="4"><input type="radio" name="q2_nav" value="5">
+                        </div>
+                        <span class="text-xs font-medium text-slate-500 w-12 text-center">ຫຼາຍສຸດ</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ສ່ວນທີ 3: ບັນທຶກເວລາ -->
+            <div class="space-y-6">
+                <h2 class="text-xl font-bold text-blue-700 flex items-center gap-2 border-b border-slate-200 pb-3"><span>⏱️</span> ສ່ວນທີ 3: ເມນູກວດການບັນທຶກເວລາ ເຂົ້າ-ອອກວຽກ</h2>
+                
+                <div class="space-y-3">
+                    <p class="text-slate-700 font-semibold">1. ການເຊັກອິນ-ເຊັກເອົາ (ການຖ່າຍຮູບ, ການສະແດງສະຖານະ) ເຮັດວຽກຖືກຕ້ອງ ແລະ ໄວ <span class="text-red-500">*</span></p>
+                    <div class="flex justify-between items-center bg-slate-50 border border-slate-200 p-4 rounded-xl max-w-lg mx-auto shadow-sm">
+                        <span class="text-xs font-medium text-slate-500 w-12 text-center">ນ້ອຍສຸດ</span>
+                        <div class="flex gap-4 sm:gap-6">
+                            <input type="radio" name="q3_checkin" value="1"><input type="radio" name="q3_checkin" value="2"><input type="radio" name="q3_checkin" value="3"><input type="radio" name="q3_checkin" value="4"><input type="radio" name="q3_checkin" value="5">
+                        </div>
+                        <span class="text-xs font-medium text-slate-500 w-12 text-center">ຫຼາຍສຸດ</span>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <p class="text-slate-700 font-semibold">2. ກໍລະນີເຊັກອິນຕອນອອກວຽກນອກ (Offsite) ລະບົບຈັບເວລາ ແລະ ສະຖານທີ່ໄດ້ຖືກຕ້ອງ <span class="text-red-500">*</span></p>
+                    <div class="flex justify-between items-center bg-slate-50 border border-slate-200 p-4 rounded-xl max-w-lg mx-auto shadow-sm">
+                        <span class="text-xs font-medium text-slate-500 w-12 text-center">ນ້ອຍສຸດ</span>
+                        <div class="flex gap-4 sm:gap-6">
+                            <input type="radio" name="q3_offsite" value="1"><input type="radio" name="q3_offsite" value="2"><input type="radio" name="q3_offsite" value="3"><input type="radio" name="q3_offsite" value="4"><input type="radio" name="q3_offsite" value="5">
+                        </div>
+                        <span class="text-xs font-medium text-slate-500 w-12 text-center">ຫຼາຍສຸດ</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ສ່ວນທີ 4: ລາພັກ ແລະ ອອກວຽກນອກ -->
+            <div class="space-y-6">
+                <h2 class="text-xl font-bold text-blue-700 flex items-center gap-2 border-b border-slate-200 pb-3"><span>📅</span> ສ່ວນທີ 4: ລະບົບອະນຸມັດຄຳຂໍລາພັກ ແລະ ຂໍອອກວຽກນອກ</h2>
+                
+                <div class="space-y-3">
+                    <p class="text-slate-700 font-semibold">1. ການອະນຸມັດຄຳຂໍລາພັກປະເພດຕ່າງໆ ເຮັດໄດ້ງ່າຍ ແລະ ສະດວກ <span class="text-red-500">*</span></p>
+                    <div class="flex justify-between items-center bg-slate-50 border border-slate-200 p-4 rounded-xl max-w-lg mx-auto shadow-sm">
+                        <span class="text-xs font-medium text-slate-500 w-12 text-center">ນ້ອຍສຸດ</span>
+                        <div class="flex gap-4 sm:gap-6">
+                            <input type="radio" name="q4_leave" value="1"><input type="radio" name="q4_leave" value="2"><input type="radio" name="q4_leave" value="3"><input type="radio" name="q4_leave" value="4"><input type="radio" name="q4_leave" value="5">
+                        </div>
+                        <span class="text-xs font-medium text-slate-500 w-12 text-center">ຫຼາຍສຸດ</span>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <p class="text-slate-700 font-semibold">2. ການອະນຸມັດຄຳຂໍອອກວຽກນອກສະຖານທີ່ (Remote/Offsite) ເຮັດໄດ້ງ່າຍ ແລະ ສະດວກ <span class="text-red-500">*</span></p>
+                    <div class="flex justify-between items-center bg-slate-50 border border-slate-200 p-4 rounded-xl max-w-lg mx-auto shadow-sm">
+                        <span class="text-xs font-medium text-slate-500 w-12 text-center">ນ້ອຍສຸດ</span>
+                        <div class="flex gap-4 sm:gap-6">
+                            <input type="radio" name="q4_remote" value="1"><input type="radio" name="q4_remote" value="2"><input type="radio" name="q4_remote" value="3"><input type="radio" name="q4_remote" value="4"><input type="radio" name="q4_remote" value="5">
+                        </div>
+                        <span class="text-xs font-medium text-slate-500 w-12 text-center">ຫຼາຍສຸດ</span>
+                    </div>
+                </div>
+
+                <!-- ເພີ່ມຄຳຖາມໃໝ່ ໝວດລາພັກ ແລະ ວຽກນອກ -->
+                <div class="space-y-3 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm mt-4">
+                    <p class="text-slate-700 font-semibold">🔹 ໃຊ້ງານງ່າຍ: ການຍື່ນຂໍລາພັກ (Leave Request) ໃນລະບົບງ່າຍ ແລະ ໄວບໍ? ທ່ານໃຊ້ເວລາປະມານຈັກນາທີ? <span class="text-red-500">*</span></p>
+                    <div class="flex flex-wrap gap-6 mt-3">
+                        <label class="flex items-center gap-2 cursor-pointer group">
+                            <input type="radio" name="leave_time_taken" value="less_than_1" class="!w-5 !h-5">
+                            <span class="font-medium text-slate-700 group-hover:text-blue-600 transition-colors">ໜ້ອຍກວ່າ 1 ນາທີ</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer group">
+                            <input type="radio" name="leave_time_taken" value="1_to_3" class="!w-5 !h-5">
+                            <span class="font-medium text-slate-700 group-hover:text-blue-600 transition-colors">1–3 ນາທີ</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer group">
+                            <input type="radio" name="leave_time_taken" value="more_than_3" class="!w-5 !h-5">
+                            <span class="font-medium text-slate-700 group-hover:text-blue-600 transition-colors">ຫຼາຍກວ່າ 3 ນາທີ</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="space-y-3 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                    <label class="block text-slate-700 font-semibold">🔹 ວຽກນອກສະຖານທີ່: ການແຈ້ງວຽກນອກສະຖານທີ່ (Outside Work) ຄົບຖ້ວນ ແລະ ກົງກັບການເຮັດວຽກຕົວຈິງຂອງທ່ານບໍ? ຖ້າບໍ່, ຂາດຫຍັງ?</label>
+                    <textarea name="outside_work_feedback" rows="2" class="w-full bg-slate-50 border border-slate-300 text-slate-800 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 outline-none transition-all resize-none shadow-sm" placeholder="ພິມຄຳຕອບຂອງທ່ານ..."></textarea>
+                </div>
+
+                <div class="space-y-3 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                    <label class="block text-slate-700 font-semibold">🔹 ຍອດວັນລາຄົງເຫຼືອ: ຂໍ້ມູນຍອດວັນລາຄົງເຫຼືອ (Leave Balance) ທີ່ສະແດງ ຖືກຕ້ອງ ແລະ ເຂົ້າໃຈງ່າຍບໍ?</label>
+                    <textarea name="leave_balance_feedback" rows="2" class="w-full bg-slate-50 border border-slate-300 text-slate-800 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 outline-none transition-all resize-none shadow-sm" placeholder="ພິມຄຳຕອບຂອງທ່ານ..."></textarea>
+                </div>
+
+                <div class="space-y-3 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                    <label class="block text-slate-700 font-semibold">🔹 ເອກະສານ PDF: ໃບລາທີ່ພິມອອກເປັນ PDF ມີຮູບແບບ ແລະ ຂໍ້ມູນຄົບຕາມທີ່ຕ້ອງການບໍ? ຄວນແກ້ໄຂຫຍັງ?</label>
+                    <textarea name="pdf_feedback" rows="2" class="w-full bg-slate-50 border border-slate-300 text-slate-800 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 outline-none transition-all resize-none shadow-sm" placeholder="ພິມຄຳຕອບຂອງທ່ານ..."></textarea>
+                </div>
+            </div>
+
+            <!-- ສ່ວນທີ 5: ປະຫວັດ ແລະ ການອະນຸມັດ -->
+            <div class="space-y-6">
+                <h2 class="text-xl font-bold text-blue-700 flex items-center gap-2 border-b border-slate-200 pb-3"><span>🔍</span> ສ່ວນທີ 5: ການເບິ່ງປະຫວັດ ແລະ ຂັ້ນຕອນອະນຸມັດ</h2>
+                
+                <div class="space-y-3">
+                    <p class="text-slate-700 font-semibold">1. ການຄົ້ນຫາ ແລະ ເບິ່ງປະຫວັດການເຊັກອິນ, ການລາພັກຍ້ອນຫຼັງ ມີຄວາມສະດວກ <span class="text-red-500">*</span></p>
+                    <div class="flex justify-between items-center bg-slate-50 border border-slate-200 p-4 rounded-xl max-w-lg mx-auto shadow-sm">
+                        <span class="text-xs font-medium text-slate-500 w-12 text-center">ນ້ອຍສຸດ</span>
+                        <div class="flex gap-4 sm:gap-6">
+                            <input type="radio" name="q5_history" value="1"><input type="radio" name="q5_history" value="2"><input type="radio" name="q5_history" value="3"><input type="radio" name="q5_history" value="4"><input type="radio" name="q5_history" value="5">
+                        </div>
+                        <span class="text-xs font-medium text-slate-500 w-12 text-center">ຫຼາຍສຸດ</span>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <p class="text-slate-700 font-semibold">2. <strong>(ສຳລັບຜູ້ຂໍ)</strong> ລະບົບສະແດງສະຖານະການອະນຸມັດ (ກຳລັງລໍຖ້າ, ອະນຸມັດແລ້ວ, ປະຕິເສດ) ໄດ້ຊັດເຈນ <span class="text-red-500">*</span></p>
+                    <div class="flex justify-between items-center bg-slate-50 border border-slate-200 p-4 rounded-xl max-w-lg mx-auto shadow-sm">
+                        <span class="text-xs font-medium text-slate-500 w-12 text-center">ນ້ອຍສຸດ</span>
+                        <div class="flex gap-4 sm:gap-6">
+                            <input type="radio" name="q5_status" value="1"><input type="radio" name="q5_status" value="2"><input type="radio" name="q5_status" value="3"><input type="radio" name="q5_status" value="4"><input type="radio" name="q5_status" value="5">
+                        </div>
+                        <span class="text-xs font-medium text-slate-500 w-12 text-center">ຫຼາຍສຸດ</span>
+                    </div>
+                </div>
+
+                <!-- ເພີ່ມຄຳຖາມໃໝ່: ສະຖານະ ແລະ ການແຈ້ງເຕືອນ -->
+                <div class="space-y-3 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm mt-4">
+                    <p class="text-slate-700 font-semibold">🔹 ສະຖານະ ແລະ ການແຈ້ງເຕືອນ: ທ່ານຮູ້ສະຖານະຄຳຮ້ອງຂອງທ່ານ (ລໍຖ້າ / ອະນຸມັດ / ປະຕິເສດ) ໄດ້ທັນເວລາບໍ? <span class="text-red-500">*</span></p>
+                    <div class="flex flex-wrap gap-6 mt-3">
+                        <label class="flex items-center gap-2 cursor-pointer group">
+                            <input type="radio" name="notification_timeliness" value="always" class="!w-5 !h-5">
+                            <span class="font-medium text-slate-700 group-hover:text-blue-600 transition-colors">ທັນສະເໝີ</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer group">
+                            <input type="radio" name="notification_timeliness" value="sometimes" class="!w-5 !h-5">
+                            <span class="font-medium text-slate-700 group-hover:text-blue-600 transition-colors">ບາງຄັ້ງ</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer group">
+                            <input type="radio" name="notification_timeliness" value="manual" class="!w-5 !h-5">
+                            <span class="font-medium text-slate-700 group-hover:text-blue-600 transition-colors">ຕ້ອງເຂົ້າໄປກວດເອງທຸກຄັ້ງ</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 bg-slate-50 p-3 rounded-lg border border-slate-200">
+                        <p class="text-slate-700 font-semibold">3. <strong>(ສຳລັບຫົວໜ້າ/HR)</strong> ຂັ້ນຕອນການອະນຸມັດຄຳຂໍລາ/ອອກວຽກນອກ ຊັດເຈນ ແລະ ໄວ <span class="text-slate-500 text-sm font-normal ml-1">(ຖ້າບໍ່ແມ່ນຫົວໜ້າ ໃຫ້ເລືອກຂ້າມ)</span></p>
+                        <label class="flex items-center gap-2 cursor-pointer bg-white border border-slate-300 hover:bg-slate-100 px-3 py-1.5 rounded-lg transition-colors shadow-sm shrink-0">
+                            <input type="checkbox" id="skip_manager_approval" onchange="toggleManagerApproval(this.checked)">
+                            <span class="text-sm font-medium text-slate-600 select-none">ຂ້າມຂໍ້ນີ້</span>
+                        </label>
+                    </div>
+                    <div id="manager_approval_div" class="flex justify-between items-center bg-slate-50 border border-slate-200 p-4 rounded-xl max-w-lg mx-auto transition-opacity duration-300 shadow-sm mt-2">
+                        <span class="text-xs font-medium text-slate-500 w-12 text-center">ນ້ອຍສຸດ</span>
+                        <div class="flex gap-4 sm:gap-6">
+                            <input type="radio" name="q5_approval" value="1"><input type="radio" name="q5_approval" value="2"><input type="radio" name="q5_approval" value="3"><input type="radio" name="q5_approval" value="4"><input type="radio" name="q5_approval" value="5">
+                        </div>
+                        <span class="text-xs font-medium text-slate-500 w-12 text-center">ຫຼາຍສຸດ</span>
+                    </div>
+                </div>
+
+                <div class="space-y-3 bg-amber-50 p-5 rounded-xl border border-amber-200 shadow-sm">
+                    <p class="text-amber-900 font-semibold">4. ທ່ານພົບຄວາມສັບສົນ ຫຼື ຄວາມລ່າຊ້າ ໃນຂັ້ນຕອນການອະນຸມັດຫຼາຍຂັ້ນຕອນ ຫຼື ບໍ່? <span class="text-red-500">*</span></p>
+                    <div class="flex gap-6 mt-2">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="approval_complexity" value="yes" class="!w-4 !h-4" onchange="document.getElementById('approval_details').classList.remove('hidden')">
+                            <span class="text-amber-800 font-medium">ພົບ (ມີຄວາມລ່າຊ້າ/ສັບສົນ)</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="approval_complexity" value="no" class="!w-4 !h-4" onchange="document.getElementById('approval_details').classList.add('hidden')">
+                            <span class="text-slate-700 font-medium">ບໍ່ພົບ (ປົກກະຕິ)</span>
+                        </label>
+                    </div>
+                    
+                    <div id="approval_details" class="hidden mt-4 space-y-2">
+                        <label class="block text-sm font-semibold text-amber-800">ການອະນຸມັດ (ສະເພາະຫົວໜ້າ/ຜູ້ຈັດການ): ຂັ້ນຕອນອະນຸມັດໃບລາ ແລະ ວຽກນອກສະຖານທີ່ ສະດວກບໍ? ມີຂັ້ນຕອນໃດຫຼາຍເກີນ ຫຼື ສັບສົນບໍ? ກະລຸນາອະທິບາຍ:</label>
+                        <textarea name="approval_complexity_desc" rows="3" class="w-full bg-white border border-amber-300 text-slate-800 rounded-xl p-3 focus:ring-2 focus:ring-amber-500 outline-none transition-all resize-none shadow-sm" placeholder="ພິມອະທິບາຍຄວາມລ່າຊ້າ ຫຼື ຄວາມສັບສົນທີ່ພົບ..."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ສ່ວນທີ 6: ການນຳໃຊ້ເມນູຕ່າງໆ -->
+            <div class="space-y-6">
+                <h2 class="text-xl font-bold text-blue-700 flex items-center gap-2 border-b border-slate-200 pb-3"><span>📂</span> ສ່ວນທີ 6: ຄວາມພໍໃຈໃນການນຳໃຊ້ເມນູຕ່າງໆ</h2>
+                <p class="text-sm font-medium text-slate-500 mb-4 bg-slate-50 p-3 rounded-lg inline-block border border-slate-100">ກະລຸນາໃຫ້ຄະແນນຄວາມສະດວກ ແລະ ການຈັດລຽງຂອງກຸ່ມເມນູຕ່າງໆ ຕາມໂຄງສ້າງໃໝ່.</p>
+                
+                <div class="space-y-3">
+                    <p class="text-slate-700 font-semibold">1. ກຸ່ມເມນູ <strong>"ພາບລວມ"</strong> (ລາຍງານສະພາບລວມ) ເຂົ້າເຖິງງ່າຍ ແລະ ຊັດເຈນ <span class="text-red-500">*</span></p>
+                    <div class="flex justify-between items-center bg-slate-50 border border-slate-200 p-4 rounded-xl max-w-lg mx-auto shadow-sm">
+                        <span class="text-xs font-medium text-slate-500 w-12 text-center">ນ້ອຍສຸດ</span>
+                        <div class="flex gap-4 sm:gap-6">
+                            <input type="radio" name="menu_overview" value="1"><input type="radio" name="menu_overview" value="2"><input type="radio" name="menu_overview" value="3"><input type="radio" name="menu_overview" value="4"><input type="radio" name="menu_overview" value="5">
+                        </div>
+                        <span class="text-xs font-medium text-slate-500 w-12 text-center">ຫຼາຍສຸດ</span>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <p class="text-slate-700 font-semibold">2. ກຸ່ມເມນູ <strong>"ການອະນຸມັດ"</strong> (ອະນຸມັດການຂໍລາພັກ, ອະນຸມັດການອອກວຽກນອກ) ຈັດລຽງໄດ້ດີ <span class="text-red-500">*</span></p>
+                    <div class="flex justify-between items-center bg-slate-50 border border-slate-200 p-4 rounded-xl max-w-lg mx-auto shadow-sm">
+                        <span class="text-xs font-medium text-slate-500 w-12 text-center">ນ້ອຍສຸດ</span>
+                        <div class="flex gap-4 sm:gap-6">
+                            <input type="radio" name="menu_approval" value="1"><input type="radio" name="menu_approval" value="2"><input type="radio" name="menu_approval" value="3"><input type="radio" name="menu_approval" value="4"><input type="radio" name="menu_approval" value="5">
+                        </div>
+                        <span class="text-xs font-medium text-slate-500 w-12 text-center">ຫຼາຍສຸດ</span>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <p class="text-slate-700 font-semibold">3. ກຸ່ມເມນູ <strong>"ການຈັດການ"</strong> (ການເຂົ້າວຽກ, ຈັດການພະນັກງານ, ຈັດການສິດ, ຈັດການສາຂາ, ຈັດການພະແນກ) ຄົ້ນຫາງ່າຍ <span class="text-red-500">*</span></p>
+                    <div class="flex justify-between items-center bg-slate-50 border border-slate-200 p-4 rounded-xl max-w-lg mx-auto shadow-sm">
+                        <span class="text-xs font-medium text-slate-500 w-12 text-center">ນ້ອຍສຸດ</span>
+                        <div class="flex gap-4 sm:gap-6">
+                            <input type="radio" name="menu_management" value="1"><input type="radio" name="menu_management" value="2"><input type="radio" name="menu_management" value="3"><input type="radio" name="menu_management" value="4"><input type="radio" name="menu_management" value="5">
+                        </div>
+                        <span class="text-xs font-medium text-slate-500 w-12 text-center">ຫຼາຍສຸດ</span>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <p class="text-slate-700 font-semibold">4. ກຸ່ມເມນູ <strong>"ລາຍງານ"</strong> (ການເຂົ້າວຽກ, ອອກວຽກກ່ອນໂມງ, ການຂໍລາພັກ, ມື້ພັກຂອງພະນັກງານ, ເລກທີລາພັກ, ອອກວຽກນອກ, ການຍົກຍ້າຍ) ຄົບຖ້ວນ <span class="text-red-500">*</span></p>
+                    <div class="flex justify-between items-center bg-slate-50 border border-slate-200 p-4 rounded-xl max-w-lg mx-auto shadow-sm">
+                        <span class="text-xs font-medium text-slate-500 w-12 text-center">ນ້ອຍສຸດ</span>
+                        <div class="flex gap-4 sm:gap-6">
+                            <input type="radio" name="menu_reports" value="1"><input type="radio" name="menu_reports" value="2"><input type="radio" name="menu_reports" value="3"><input type="radio" name="menu_reports" value="4"><input type="radio" name="menu_reports" value="5">
+                        </div>
+                        <span class="text-xs font-medium text-slate-500 w-12 text-center">ຫຼາຍສຸດ</span>
+                    </div>
+                </div>
+                
+                <div class="space-y-3">
+                    <p class="text-slate-700 font-semibold">5. ກຸ່ມເມນູ <strong>"ອື່ນໆ"</strong> (ຈັດການນະໂຍບາຍ, ຈັດການມື້ພັກ, ຕັ້ງຄ່າລະບົບ) ຈັດລຽງໄດ້ເໝາະສົມ <span class="text-red-500">*</span></p>
+                    <div class="flex justify-between items-center bg-slate-50 border border-slate-200 p-4 rounded-xl max-w-lg mx-auto shadow-sm">
+                        <span class="text-xs font-medium text-slate-500 w-12 text-center">ນ້ອຍສຸດ</span>
+                        <div class="flex gap-4 sm:gap-6">
+                            <input type="radio" name="menu_others" value="1"><input type="radio" name="menu_others" value="2"><input type="radio" name="menu_others" value="3"><input type="radio" name="menu_others" value="4"><input type="radio" name="menu_others" value="5">
+                        </div>
+                        <span class="text-xs font-medium text-slate-500 w-12 text-center">ຫຼາຍສຸດ</span>
+                    </div>
+                </div>
+
+                <!-- ເພີ່ມຄຳຖາມໃໝ່: Dashboard -->
+                <div class="space-y-3 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm mt-4">
+                    <label class="block text-slate-700 font-semibold">🔹 Dashboard: ຂໍ້ມູນໃນໜ້າ Dashboard (ສະຖິຕິການເຂົ້າວຽກ, ພະນັກງານລາພັກມື້ນີ້ ແລະ ອື່ນໆ) ມີປະໂຫຍດຕໍ່ທ່ານບໍ? ຢາກໃຫ້ເພີ່ມຂໍ້ມູນຫຍັງ?</label>
+                    <textarea name="dashboard_feedback" rows="2" class="w-full bg-slate-50 border border-slate-300 text-slate-800 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 outline-none transition-all resize-none shadow-sm" placeholder="ພິມຄຳຕອບຂອງທ່ານ..."></textarea>
+                </div>
+            </div>
+
+            <!-- ສ່ວນທີ 7: ການປະເມີນ Bug ຫຼັງການອັບເດດ -->
+            <div class="space-y-6 bg-red-50 p-6 rounded-2xl border border-red-200 shadow-sm">
+                <h2 class="text-xl font-bold text-red-700 flex items-center gap-2 border-b border-red-200 pb-3">
+                    <span class="text-2xl">🚨</span> ສ່ວນທີ 7: ລາຍງານບັນຫາ (Bugs)
+                </h2>
+
+                <div class="space-y-3">
+                    <p class="text-slate-800 font-semibold">1. ທ່ານພົບ <strong>ບັນຫາໃໝ່ ຫຼື ຂໍ້ຜິດພາດ (Bug)</strong> ສະເພາະໃນອຸປະກອນ/ບຣາວເຊີ ທີ່ທ່ານໃຊ້ຫຼືບໍ່? <span class="text-red-500">*</span></p>
+                    <div class="flex gap-6 mt-2">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="found_new_bugs" value="yes" class="!w-4 !h-4" onchange="document.getElementById('new_bugs_details').classList.remove('hidden')">
+                            <span class="text-red-700 font-medium">ພົບເຫັນ</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="found_new_bugs" value="no" class="!w-4 !h-4" onchange="document.getElementById('new_bugs_details').classList.add('hidden')">
+                            <span class="text-slate-700 font-medium">ບໍ່ພົບ</span>
+                        </label>
+                    </div>
+                    
+                    <div id="new_bugs_details" class="hidden mt-4 space-y-2">
+                        <label class="block text-sm font-semibold text-red-700">ກະລຸນາລະບຸບັນຫາສະເພາະທີ່ພົບ (ພ້ອມບອກອຸປະກອນ/ບຣາວເຊີ ທີ່ເກີດບັນຫາ):</label>
+                        <textarea name="new_bugs_description" rows="3" class="w-full bg-white border border-red-300 text-slate-800 rounded-xl p-3 focus:ring-2 focus:ring-red-500 outline-none transition-all resize-none shadow-sm" placeholder="ຕົວຢ່າງ: ໃຊ້ iPhone ເຂົ້າຜ່ານ Safari ແລ້ວກົດຖ່າຍຮູບບໍ່ໄດ້..."></textarea>
+                    </div>
+                </div>
+
+                <!-- ເພີ່ມຄຳຖາມໃໝ່: ການໃຊ້ງານມືຖື -->
+                <div class="space-y-3 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm mt-4">
+                    <label class="block text-slate-700 font-semibold">🔹 ໃຊ້ຢູ່ມືຖື: ທ່ານໃຊ້ລະບົບຢູ່ມືຖືເລື້ອຍສໍ່າໃດ ແລະ ເຈິບັນຫາຫຍັງບໍ (ເປີດຊ້າ, ປຸ່ມກົດຍາກ, ໜ້າຈໍສະແດງບໍ່ຄົບ)?</label>
+                    <textarea name="mobile_feedback" rows="2" class="w-full bg-slate-50 border border-slate-300 text-slate-800 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 outline-none transition-all resize-none shadow-sm" placeholder="ພິມຄຳຕອບຂອງທ່ານ..."></textarea>
+                </div>
+            </div>
+
+            <!-- ຂໍ້ສະເໜີແນະເພີ່ມເຕີມ ແລະ ຄວາມພໍໃຈລວມ -->
+            <div class="space-y-6">
+                <h2 class="text-xl font-bold text-blue-700 flex items-center gap-2 border-b border-slate-200 pb-3"><span>💬</span> ສ່ວນທີ 8: ສະຫຼຸບຄວາມພໍໃຈ ແລະ ຂໍ້ສະເໜີແນະ</h2>
+                
+                <div class="space-y-4 bg-slate-50 p-6 rounded-2xl border border-slate-200 shadow-sm text-center">
+                    <p class="text-lg font-bold text-slate-800">ຄວາມພໍໃຈໂດຍລວມ: ທ່ານພໍໃຈກັບລະບົບ HRM ໂດຍລວມຫຼາຍສໍ່າໃດ?<br><span class="text-sm font-normal text-slate-500">(1 = ບໍ່ພໍໃຈເລີຍ, 5 = ພໍໃຈຫຼາຍ)</span> <span class="text-red-500">*</span></p>
+                    <div class="flex justify-center items-center py-2">
+                        <div class="flex gap-2 sm:gap-4 flex-row-reverse justify-center star-rating">
+                            <input type="radio" id="star5" name="overall_satisfaction" value="5" class="hidden" />
+                            <label for="star5" class="text-5xl text-slate-300 cursor-pointer transition-colors duration-200">★</label>
+                            
+                            <input type="radio" id="star4" name="overall_satisfaction" value="4" class="hidden" />
+                            <label for="star4" class="text-5xl text-slate-300 cursor-pointer transition-colors duration-200">★</label>
+                            
+                            <input type="radio" id="star3" name="overall_satisfaction" value="3" class="hidden" />
+                            <label for="star3" class="text-5xl text-slate-300 cursor-pointer transition-colors duration-200">★</label>
+                            
+                            <input type="radio" id="star2" name="overall_satisfaction" value="2" class="hidden" />
+                            <label for="star2" class="text-5xl text-slate-300 cursor-pointer transition-colors duration-200">★</label>
+                            
+                            <input type="radio" id="star1" name="overall_satisfaction" value="1" class="hidden" />
+                            <label for="star1" class="text-5xl text-slate-300 cursor-pointer transition-colors duration-200">★</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-3 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                    <label class="block font-semibold text-blue-700">💡 1. ມີຟີເຈີໃດທີ່ທ່ານຢາກໃຫ້ມີການເພີ່ມເຕີມ ຫຼື ປັບປຸງກ່ອນໝູ່ທີ່ສຸດ? <span class="text-red-500">*</span></label>
+                    <textarea name="top_priority_feature" rows="3" class="w-full bg-slate-50 border border-slate-300 text-slate-800 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all resize-none" placeholder="ບອກສິ່ງທີ່ສຳຄັນທີ່ສຸດທີ່ຢາກໃຫ້ປັບປຸງ (ຖ້າບໍ່ມີໃຫ້ພິມຄຳວ່າ 'ບໍ່ມີ')"></textarea>
+                </div>
+
+                <div class="space-y-3 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                    <label class="block font-semibold text-slate-700">📝 2. ຂໍ້ສະເໜີແນະ: ມີບັນຫາ, error ຫຼື ຟັງຊັນໃໝ່ທີ່ທ່ານຢາກໃຫ້ພັດທະນາຕື່ມບໍ? (ກະລຸນາອະທິບາຍ)</label>
+                    <textarea name="other_comments" rows="3" class="w-full bg-slate-50 border border-slate-300 text-slate-800 rounded-xl p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all resize-none" placeholder="ພິມຂໍ້ສະເໜີແນະເພີ່ມເຕີມຂອງທ່ານ..."></textarea>
+                </div>
+            </div>
+
+            <div class="pt-6 border-t border-slate-200">
+                <button type="submit" id="submitBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-600/30 transition-all transform hover:-translate-y-1 active:translate-y-0 text-lg flex justify-center items-center gap-2">
+                    <span>ສົ່ງແບບສອບຖາມ</span>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </button>
+            </div>
+            
+        </form>
+    </div>
+
+    <script>
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwr424d6EKlRIVBON3Nd3RUfrfZV_9QUzci71PFr3j5Ic-JikJqI7M1oEgy-MbcPrB3aQ/exec'; 
+
+        function showAlert(title, message, isSuccess = false) {
+            const modal = document.getElementById('customModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalMessage = document.getElementById('modalMessage');
+            
+            modalTitle.innerText = title;
+            modalMessage.innerText = message;
+            
+            const iconContainer = modalTitle.parentElement.firstElementChild;
+            if (isSuccess) {
+                iconContainer.innerText = '🎉';
+                iconContainer.className = 'w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 text-xl';
+            } else {
+                iconContainer.innerText = '⚠️';
+                iconContainer.className = 'w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-600 text-xl';
+            }
+            
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('customModal').classList.add('hidden');
+        }
+
+        function toggleManagerApproval(isSkipped) {
+            const contentDiv = document.getElementById('manager_approval_div');
+            const radios = contentDiv.querySelectorAll('input[type="radio"]');
+
+            if (isSkipped) {
+                contentDiv.classList.add('opacity-40', 'pointer-events-none', 'bg-slate-100');
+                radios.forEach(radio => radio.checked = false); 
+            } else {
+                contentDiv.classList.remove('opacity-40', 'pointer-events-none', 'bg-slate-100');
+            }
+        }
+
+        async function submitForm(event) {
+            event.preventDefault(); 
+            const form = event.target;
+            
+            // 🛠️ 1. ກວດສອບຂໍ້ມູນທົ່ວໄປ
+            if (!form.department.value.trim()) { showAlert('ແຈ້ງເຕືອນ', 'ກະລຸນາປ້ອນຊື່ພະແນກ / ຝ່າຍ!'); return; }
+            if (!form.branch.value) { showAlert('ແຈ້ງເຕືອນ', 'ກະລຸນາເລືອກສາຂາທີ່ປະຈຳການ!'); return; }
+
+            const checkedDevices = document.querySelectorAll('input[name="device"]:checked');
+            if (checkedDevices.length === 0) {
+                showAlert('ແຈ້ງເຕືອນ', 'ກະລຸນາເລືອກອຸປະກອນ/ບຣາວເຊີທີ່ນຳໃຊ້ຢ່າງໜ້ອຍ 1 ຢ່າງ!');
+                return;
+            }
+
+            // 🛠️ 2. ກວດສອບຄະແນນ (Radio Buttons)
+            const skipManagerApproval = document.getElementById('skip_manager_approval').checked;
+
+            let radioGroups = [
+                'q2_1', 'q2_2', 'q2_nav', 
+                'q3_checkin', 'q3_offsite', 
+                'q4_leave', 'q4_remote', 
+                'q5_history', 'q5_status',
+                'menu_overview', 'menu_approval', 'menu_management', 'menu_reports', 'menu_others' // Added Section 6
+            ];
+            
+            if (!skipManagerApproval) { radioGroups.push('q5_approval'); }
+
+            for (let name of radioGroups) {
+                if (!document.querySelector(`input[name="${name}"]:checked`)) {
+                    showAlert('ແຈ້ງເຕືອນ', 'ກະລຸນາໃຫ້ຄະແນນໃຫ້ຄົບທຸກຂໍ້ (1-5) ໃນພາກທີ 2 ຫາ 6!');
+                    return;
+                }
+            }
+
+            // 🛠️ 3. ກວດສອບ Radio Questions
+            if (!document.querySelector('input[name="leave_time_taken"]:checked')) {
+                showAlert('ແຈ້ງເຕືອນ', 'ກະລຸນາຕອບຄຳຖາມ: ໃຊ້ງານງ່າຍ (ເວລາໃນການຍື່ນຂໍລາພັກ)!'); return;
+            }
+            if (!document.querySelector('input[name="notification_timeliness"]:checked')) {
+                showAlert('ແຈ້ງເຕືອນ', 'ກະລຸນາຕອບຄຳຖາມ: ສະຖານະ ແລະ ການແຈ້ງເຕືອນ (ພາກທີ 5)!'); return;
+            }
+            
+            if (!document.querySelector('input[name="approval_complexity"]:checked')) {
+                showAlert('ແຈ້ງເຕືອນ', 'ກະລຸນາຕອບຄຳຖາມ: ພົບຄວາມສັບສົນໃນຂັ້ນຕອນອະນຸມັດບໍ່?'); return;
+            }
+            if (!document.querySelector('input[name="found_new_bugs"]:checked')) {
+                showAlert('ແຈ້ງເຕືອນ', 'ກະລຸນາຕອບຄຳຖາມ: ທ່ານພົບບັນຫາໃໝ່ (Bug) ຫຼື ບໍ່?'); return;
+            }
+            if (!document.querySelector('input[name="overall_satisfaction"]:checked')) {
+                showAlert('ແຈ້ງເຕືອນ', 'ກະລຸນາໃຫ້ຄະແນນຄວາມພໍໃຈໂດຍລວມ (ດາວ) ໃນສ່ວນທີ 8!'); return;
+            }
+
+            // ກວດສອບຊ່ອງ text ທີ່ຂຶ້ນກັບ radio
+            if (form.approval_complexity.value === 'yes' && !form.approval_complexity_desc.value.trim()) {
+                showAlert('ແຈ້ງເຕືອນ', 'ກະລຸນາອະທິບາຍຄວາມສັບສົນ/ລ່າຊ້າໃນການອະນຸມັດທີ່ພົບ'); return;
+            }
+            if (form.found_new_bugs.value === 'yes' && !form.new_bugs_description.value.trim()) {
+                showAlert('ແຈ້ງເຕືອນ', 'ກະລຸນາອະທິບາຍບັນຫາໃໝ່ (Bug) ທີ່ທ່ານພົບເຫັນ'); return;
+            }
+
+            // 🛠️ 4. ກວດສອບຊ່ອງຂໍ້ຄວາມບັງຄັບ
+            if (!form.top_priority_feature.value.trim()) { 
+                showAlert('ແຈ້ງເຕືອນ', 'ກະລຸນາລະບຸຟີເຈີທີ່ຢາກໃຫ້ປັບປຸງກ່ອນໝູ່ (ຖ້າບໍ່ມີໃຫ້ພິມ "ບໍ່ມີ")'); return; 
+            }
+
+            // ຜ່ານການກວດສອບ -> ກຽມສົ່ງຂໍ້ມູນ
+            const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn.innerHTML;
+            
+            submitBtn.innerHTML = 'ກຳລັງສົ່ງຂໍ້ມູນ... ⏳';
+            submitBtn.disabled = true;
+
+            const formData = new FormData(form);
+            const data = new URLSearchParams();
+            
+            for (const pair of formData.entries()) {
+                if (pair[0] !== 'device') {
+                    data.append(pair[0], pair[1]);
+                }
+            }
+
+            if (skipManagerApproval) {
+                data.set('q5_approval', 'ບໍ່ໄດ້ໃຊ້/ບໍ່ແມ່ນຫົວໜ້າ');
+            }
+
+            let devices = [];
+            checkedDevices.forEach(cb => devices.push(cb.value));
+            data.append('device', devices.join(', '));
+
+            try {
+                // ສົ່ງຂໍ້ມູນ
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    body: data
+                });
+                
+                showAlert('ສຳເລັດ', '🎉 ສົ່ງຂໍ້ມູນສຳເລັດແລ້ວ! ຂໍຂອບໃຈສຳລັບຄຳຄິດເຫັນຂອງທ່ານ.', true);
+                form.reset(); 
+                
+                // Reset hidden fields
+                document.getElementById('approval_details').classList.add('hidden');
+                document.getElementById('new_bugs_details').classList.add('hidden');
+                
+            } catch (error) {
+                console.error('Error!', error.message);
+                showAlert('ຜິດພາດ', '❌ ເກີດຂໍ້ຜິດພາດໃນການສົ່ງຂໍ້ມູນ ກະລຸນາລອງໃໝ່ອີກຄັ້ງ.');
+            } finally {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
