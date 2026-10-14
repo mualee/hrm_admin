@@ -51,16 +51,6 @@
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
         }
-        .comment-card {
-            break-inside: avoid;
-            margin-bottom: 1.5rem;
-        }
-        .masonry-grid {
-            column-count: 1;
-            column-gap: 1.5rem;
-        }
-        @media (min-width: 768px) { .masonry-grid { column-count: 2; } }
-        @media (min-width: 1280px) { .masonry-grid { column-count: 3; } }
     </style>
 </head>
 <body class="text-slate-800">
@@ -224,22 +214,28 @@
 
                 <!-- 5. Comments & Feedback Section -->
                 <div id="comments-section" class="mb-8">
-                    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-end mb-6 gap-4">
-                        <div>
-                            <h3 class="text-xl font-bold text-slate-800 flex items-center gap-2">
-                                <i class="fa-regular fa-comments text-sky-600"></i> ລາຍການຄຳຄິດເຫັນ ແລະ ຂໍ້ສະເໜີແນະ
-                            </h3>
-                            <p class="text-sm text-slate-500 mt-1">ສະແດງຄອມເມັນຈາກທຸກໆຊ່ອງຄຳຖາມ (Bugs, Dashboard, PDF, ມືຖື, ແລະ ອື່ນໆ)</p>
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 mb-5">
+                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
+                            <div>
+                                <h3 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                                    <i class="fa-regular fa-comments text-sky-600"></i> ຄຳຄິດເຫັນ ແລະ ຂໍ້ສະເໜີແນະ
+                                </h3>
+                                <p class="text-sm text-slate-500 mt-1">ລຽງຈາກໃໝ່ຫາເກົ່າ · ເລືອກໝວດດ້ານລຸ່ມເພື່ອກັ່ນຕອງ</p>
+                            </div>
+                            <div class="relative sm:w-64">
+                                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                                <input id="commentSearch" type="text" placeholder="ຄົ້ນຫາຄຳເຫັນ / ພະແນກ..." class="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400">
+                            </div>
                         </div>
-                        <div class="inline-flex bg-slate-200/50 p-1 rounded-lg">
-                            <span class="text-xs font-medium text-slate-500 px-3 py-2">ສະແດງຜົນລ່າສຸດ</span>
-                        </div>
+                        <!-- Category filter chips -->
+                        <div id="commentFilters" class="flex flex-wrap gap-2"></div>
                     </div>
 
-                    <!-- Masonry Grid for Comments -->
-                    <div id="commentsContainer" class="masonry-grid">
-                        <!-- Comments will be injected here via JS -->
-                        <div class="text-center py-10 text-slate-500">ກຳລັງໂຫຼດຄອມເມັນ...</div>
+                    <div id="commentsContainer" class="flex flex-col gap-3">
+                        <div class="col-span-full text-center py-10 text-slate-500">ກຳລັງໂຫຼດຄອມເມັນ...</div>
+                    </div>
+                    <div class="text-center mt-5">
+                        <button id="commentsMore" class="hidden px-5 py-2 text-sm font-medium rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 shadow-sm">ສະແດງເພີ່ມ</button>
                     </div>
                 </div>
 
@@ -564,89 +560,139 @@
             // -----------------------------------------------------
             // 7. Render Comments (100% of all text fields)
             // -----------------------------------------------------
-            const commentsContainer = document.getElementById('commentsContainer');
-            commentsContainer.innerHTML = ''; 
-            
-            // ຕອງເອົາແຕ່ຄົນທີ່ມີການພິມຂໍ້ຄວາມຢ່າງໜ້ອຍ 1 ຢ່າງ
-            let commentsData = data.filter(item => 
-                (item.suggestions || '').trim() !== '' || 
-                (item.new_bugs_description || '').trim() !== '' ||
-                (item.mobile_feedback || '').trim() !== '' ||
-                (item.dashboard_feedback || '').trim() !== '' ||
-                (item.outside_work_feedback || '').trim() !== '' ||
-                (item.pdf_feedback || '').trim() !== '' ||
-                (item.manager_approval_feedback || '').trim() !== ''
-            );
+            renderComments(data);
+        }
 
-            // ລຽງຈາກໃໝ່ໄປເກົ່າ (ຖ້າມີ timestamp)
-            commentsData.sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
-            commentsData = commentsData.slice(0, 50); // ສະແດງ 50 ອັນລ່າສຸດ
+        // -----------------------------------------------------
+        // Comments: ໝວດ, ກັ່ນຕອງ, ຄົ້ນຫາ
+        // -----------------------------------------------------
+        const COMMENT_FIELDS = [
+            { key: 'new_bugs_description',      icon: 'fa-bug',              label: 'ແຈ້ງບັນຫາ (Bug)',     color: 'red' },
+            { key: 'mobile_feedback',           icon: 'fa-mobile-screen',    label: 'ການໃຊ້ຢູ່ມືຖື',        color: 'purple' },
+            { key: 'dashboard_feedback',        icon: 'fa-chart-pie',        label: 'Dashboard',          color: 'sky' },
+            { key: 'pdf_feedback',              icon: 'fa-file-pdf',         label: 'ຮູບແບບ PDF',          color: 'orange' },
+            { key: 'outside_work_feedback',     icon: 'fa-map-location-dot', label: 'ວຽກນອກສະຖານທີ່',      color: 'teal' },
+            { key: 'manager_approval_feedback', icon: 'fa-user-tie',         label: 'ການອະນຸມັດ (ຫົວໜ້າ)', color: 'indigo' },
+            { key: 'suggestions',               icon: 'fa-comment-dots',     label: 'ຂໍ້ສະເໜີແນະທົ່ວໄປ',    color: 'slate' },
+        ];
+        // ຂຽນ class ເຕັມເພື່ອໃຫ້ Tailwind CDN ສ້າງ style ໄດ້
+        const COLOR_CLASSES = {
+            red:    { icon: 'bg-red-100 text-red-600',       label: 'text-red-600',    chip: 'bg-red-600' },
+            purple: { icon: 'bg-purple-100 text-purple-600', label: 'text-purple-700', chip: 'bg-purple-600' },
+            sky:    { icon: 'bg-sky-100 text-sky-600',       label: 'text-sky-700',    chip: 'bg-sky-600' },
+            orange: { icon: 'bg-orange-100 text-orange-600', label: 'text-orange-700', chip: 'bg-orange-600' },
+            teal:   { icon: 'bg-teal-100 text-teal-600',     label: 'text-teal-700',   chip: 'bg-teal-600' },
+            indigo: { icon: 'bg-indigo-100 text-indigo-600', label: 'text-indigo-700', chip: 'bg-indigo-600' },
+            slate:  { icon: 'bg-slate-200 text-slate-600',   label: 'text-slate-700',  chip: 'bg-slate-700' },
+        };
+        const COMMENTS_PAGE = 20;
+        const commentState = { all: [], filter: 'all', search: '', shown: COMMENTS_PAGE };
 
-            if(commentsData.length === 0) {
-                commentsContainer.innerHTML = '<div class="col-span-full text-center py-10 text-slate-500">ຍັງບໍ່ມີຄອມເມັນໃນລະບົບ</div>';
+        const escapeHtml = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        const hasText = v => { const t = String(v || '').trim(); return t !== '' && t !== 'ບໍ່ໄດ້ໃຊ້/ບໍ່ແມ່ນຫົວໜ້າ'; };
+
+        function renderComments(data) {
+            // ເອົາແຕ່ຄົນທີ່ພິມຂໍ້ຄວາມຢ່າງໜ້ອຍ 1 ຊ່ອງ, ລຽງໃໝ່ຫາເກົ່າ
+            commentState.all = data
+                .filter(item => COMMENT_FIELDS.some(f => hasText(item[f.key])))
+                .sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
+
+            document.getElementById('commentSearch').oninput = e => {
+                commentState.search = e.target.value.trim().toLowerCase();
+                commentState.shown = COMMENTS_PAGE;
+                drawComments();
+            };
+            document.getElementById('commentsMore').onclick = () => {
+                commentState.shown += COMMENTS_PAGE;
+                drawComments();
+            };
+            drawFilters();
+            drawComments();
+        }
+
+        function drawFilters() {
+            const box = document.getElementById('commentFilters');
+            const chips = [{ key: 'all', label: 'ທັງໝົດ', icon: 'fa-layer-group', color: 'slate', count: commentState.all.length }]
+                .concat(COMMENT_FIELDS.map(f => ({ ...f, count: commentState.all.filter(i => hasText(i[f.key])).length })))
+                .filter(c => c.key === 'all' || c.count > 0);
+
+            box.innerHTML = chips.map(c => {
+                const active = commentState.filter === c.key;
+                const cls = active
+                    ? `${COLOR_CLASSES[c.color].chip} text-white border-transparent`
+                    : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50';
+                return `<button data-key="${c.key}" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-sm font-medium transition-colors ${cls}">
+                            <i class="fa-solid ${c.icon} text-xs"></i>${c.label}
+                            <span class="text-xs px-1.5 rounded-full ${active ? 'bg-white/25' : 'bg-slate-100 text-slate-500'}">${c.count}</span>
+                        </button>`;
+            }).join('');
+
+            box.querySelectorAll('button').forEach(btn => btn.onclick = () => {
+                commentState.filter = btn.dataset.key;
+                commentState.shown = COMMENTS_PAGE;
+                drawFilters();
+                drawComments();
+            });
+        }
+
+        function drawComments() {
+            const container = document.getElementById('commentsContainer');
+            const moreBtn = document.getElementById('commentsMore');
+            const { filter, search } = commentState;
+            const fields = filter === 'all' ? COMMENT_FIELDS : COMMENT_FIELDS.filter(f => f.key === filter);
+
+            const list = commentState.all.filter(item => {
+                const visible = fields.filter(f => hasText(item[f.key]));
+                if (visible.length === 0) return false;
+                if (!search) return true;
+                const haystack = [item.department, item.branch, ...visible.map(f => item[f.key])].join(' ').toLowerCase();
+                return haystack.includes(search);
+            });
+
+            if (list.length === 0) {
+                container.innerHTML = '<div class="col-span-full text-center py-12 text-slate-400 bg-white rounded-2xl border border-dashed border-slate-200"><i class="fa-regular fa-comment-dots text-3xl mb-2 block"></i>ບໍ່ພົບຄຳເຫັນ</div>';
+                moreBtn.classList.add('hidden');
                 return;
             }
 
-            commentsData.forEach(item => {
-                // ສ້າງ Card
-                const card = document.createElement('div');
-                card.className = 'bg-white rounded-2xl border border-slate-200 shadow-sm p-5 comment-card hover:shadow-md transition-shadow';
-                
-                let starsHtml = '';
-                const score = item.overall_satisfaction || 0;
-                for(let i=1; i<=5; i++) { starsHtml += `<span class="${i <= score ? 'text-amber-400' : 'text-slate-200'} text-lg">★</span>`; }
+            const deviceIcons = { 'Desktop': 'fa-desktop', 'Mobile': 'fa-mobile-screen', 'Tablet': 'fa-tablet-screen-button' };
 
-                const timeString = item.timestamp ? new Date(item.timestamp).toLocaleDateString('lo-LA') : '';
-                const branchStr = item.branch ? ` - ${item.branch}` : '';
+            container.innerHTML = list.slice(0, commentState.shown).map(item => {
+                const score = Number(item.overall_satisfaction) || 0;
+                const stars = Array.from({ length: 5 }, (_, i) => `<span class="${i < score ? 'text-amber-400' : 'text-slate-200'}">★</span>`).join('');
+                const date = item.timestamp ? new Date(item.timestamp).toLocaleDateString('lo-LA') : '';
+                const devices = String(item.device || '').split(',').map(d => d.trim()).filter(Boolean)
+                    .map(d => `<i class="fa-solid ${deviceIcons[d] || 'fa-circle-question'}" title="${escapeHtml(d)}"></i>`).join('');
 
-                // ປ້າຍອຸປະກອນທີ່ຜູ້ຕອບເລືອກ
-                const deviceIcons = { 'Desktop': 'fa-desktop', 'Mobile': 'fa-mobile-screen', 'Tablet': 'fa-tablet-screen-button' };
-                const deviceHtml = String(item.device || '').split(',').map(d => d.trim()).filter(Boolean)
-                    .map(d => `<span class="bg-blue-50 text-blue-700 text-xs px-2 py-0.5 rounded-md font-medium inline-flex items-center gap-1"><i class="fa-solid ${deviceIcons[d] || 'fa-circle-question'}"></i>${d}</span>`)
-                    .join('');
-
-                let html = `
-                    <div class="flex justify-between items-start mb-4 border-b border-slate-100 pb-3">
-                        <div>
-                            <div class="flex flex-wrap items-center gap-2 mb-1">
-                                <span class="bg-slate-100 text-slate-700 text-xs px-2.5 py-1 rounded-md font-bold">${item.department || 'ບໍ່ລະບຸ'}</span>
-                                <span class="text-xs text-slate-400 font-medium">${branchStr}</span>
-                            </div>
-                            ${deviceHtml ? `<div class="flex flex-wrap gap-1 mb-1">${deviceHtml}</div>` : ''}
-                            <div class="tracking-widest">${starsHtml}</div>
-                        </div>
-                        <span class="text-xs text-slate-400 whitespace-nowrap ml-2">${timeString}</span>
-                    </div>
-                    <div class="space-y-3">
-                `;
-
-                // ຟັງຊັນສ້າງ block ຂໍ້ຄວາມແຕ່ລະປະເພດໃຫ້ສີຕ່າງກັນ
-                const addFeedbackBlock = (text, icon, title, colorClass, borderClass, textClass) => {
-                    if (text && text.trim() !== '' && text.trim() !== 'ບໍ່ໄດ້ໃຊ້/ບໍ່ແມ່ນຫົວໜ້າ') {
-                        html += `
-                            <div class="${colorClass} rounded-xl p-3 border ${borderClass}">
-                                <div class="flex items-center gap-2 mb-1 ${textClass}">
-                                    <i class="fa-solid ${icon} text-sm"></i> <span class="font-bold text-xs uppercase tracking-wide">${title}</span>
+                const body = fields.filter(f => hasText(item[f.key])).map(f => {
+                    const c = COLOR_CLASSES[f.color];
+                    return `<div class="flex gap-3 min-w-0">
+                                <div class="w-8 h-8 rounded-lg ${c.icon} flex items-center justify-center flex-shrink-0"><i class="fa-solid ${f.icon} text-sm"></i></div>
+                                <div class="min-w-0">
+                                    <div class="text-xs font-semibold ${c.label} mb-0.5">${f.label}</div>
+                                    <p class="text-[15px] text-slate-700 leading-7 break-words">${escapeHtml(item[f.key]).replace(/\n/g, '<br>')}</p>
                                 </div>
-                                <p class="text-sm text-slate-700 leading-relaxed">${text}</p>
+                            </div>`;
+                }).join('');
+
+                // ແນວນອນ: ຂໍ້ມູນຜູ້ຕອບຢູ່ຊ້າຍ, ຄຳເຫັນຮຽງເປັນຖັນຢູ່ຂວາ
+                return `<div class="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow flex flex-col md:flex-row">
+                            <div class="md:w-56 flex-shrink-0 px-5 py-4 bg-slate-50/60 border-b md:border-b-0 md:border-r border-slate-100 rounded-t-2xl md:rounded-tr-none md:rounded-l-2xl space-y-1">
+                                <div class="font-semibold text-slate-800 break-words">${escapeHtml(item.department || 'ບໍ່ລະບຸ')}</div>
+                                ${item.branch ? `<div class="text-xs text-slate-500">${escapeHtml(item.branch)}</div>` : ''}
+                                <div class="text-sm tracking-wider" title="${score}/5">${stars}</div>
+                                <div class="flex items-center gap-2 text-xs text-slate-400">
+                                    <span>${date}</span>
+                                    ${devices ? `<span class="flex gap-1.5">${devices}</span>` : ''}
+                                </div>
                             </div>
-                        `;
-                    }
-                };
+                            <div class="flex-1 min-w-0 px-5 py-4 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-4">${body}</div>
+                        </div>`;
+            }).join('');
 
-                // ໃສ່ຂໍ້ມູນທຸກຊ່ອງ
-                addFeedbackBlock(item.new_bugs_description, 'fa-bug', 'ແຈ້ງບັນຫາ (Bug)', 'bg-red-50', 'border-red-100', 'text-red-600');
-                addFeedbackBlock(item.mobile_feedback, 'fa-mobile-screen', 'ຄຳຖາມ: ການໃຊ້ຢູ່ມືຖື','bg-purple-50', 'border-purple-100', 'text-purple-700');
-                addFeedbackBlock(item.dashboard_feedback, 'fa-chart-pie', 'ຄຳເຫັນ Dashboard', 'bg-sky-50', 'border-sky-100', 'text-sky-700');
-                addFeedbackBlock(item.pdf_feedback, 'fa-file-pdf', 'ຮູບແບບ PDF', 'bg-orange-50', 'border-orange-100', 'text-orange-700');
-                addFeedbackBlock(item.outside_work_feedback, 'fa-map-location-dot', 'ວຽກນອກສະຖານທີ່', 'bg-teal-50', 'border-teal-100', 'text-teal-700');
-                addFeedbackBlock(item.manager_approval_feedback, 'fa-user-tie', 'ການອະນຸມັດ (ຫົວໜ້າ)', 'bg-indigo-50', 'border-indigo-100', 'text-indigo-700');
-                addFeedbackBlock(item.suggestions, 'fa-comment-dots', 'ຂໍ້ສະເໜີແນະທົ່ວໄປ', 'bg-slate-50', 'border-slate-200', 'text-slate-700');
-
-                html += `</div>`;
-                card.innerHTML = html;
-                commentsContainer.appendChild(card);
-            });
+            const remaining = list.length - commentState.shown;
+            moreBtn.classList.toggle('hidden', remaining <= 0);
+            moreBtn.textContent = `ສະແດງເພີ່ມ (ເຫຼືອ ${remaining})`;
         }
 
         // ເອີ້ນໃຊ້ງານທັນທີ
